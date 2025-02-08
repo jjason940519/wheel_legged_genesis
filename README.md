@@ -7,8 +7,8 @@ NVIDIA/AMD GPU or CPU
 ## Test & Development Platform:  
 1. i5 12400f +  Geforce RTX4070  
 2. i7 12700kf + Radeon Rx7900xt
-
-## Install Genesis before running:  
+## Before running
+Install Genesis:  
 <https://github.com/Genesis-Embodied-AI/Genesis>  
 install rsl-rl:    
 `git clone https://github.com/leggedrobotics/rsl_rl`  
