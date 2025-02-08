@@ -6,7 +6,8 @@ Hardware requirements:
 NVIDIA/AMD GPU or CPU  
 Test & Development Platform:  
 1. i5 12400f +  Geforce RTX4070  
-2. i7 12700kf + Radeon Rx7900xt  
+2. i7 12700kf + Radeon Rx7900xt
+
 Install Genesis before running:  
 <https://github.com/Genesis-Embodied-AI/Genesis>
 install rsl-rl:    
