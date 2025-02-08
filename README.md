@@ -1,5 +1,5 @@
 # wheel_legged_genesis
-Reinforcement learning of wheel-legged robots based on Genesis
+Reinforcement learning of wheel-legged robots based on Genesis  
 在运行前先安装Genesis:
 <https://github.com/Genesis-Embodied-AI/Genesis>
 
