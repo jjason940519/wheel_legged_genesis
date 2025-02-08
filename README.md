@@ -10,3 +10,6 @@ Reinforcement learning of wheel-legged robots based on Genesis
 `python locomotion/wheel_legged_train.py`  
 测试：  
 `python locomotion/wheel_legged_eval.py`  
+效果演示：  
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=113956622438619&bvid=BV1DUNHe7EjP&cid=28244839085&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>  
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=113961890484575&bvid=BV1oSN8eUEXw&cid=28260764260&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>  
