@@ -9,7 +9,7 @@ Test & Development Platform:
 2. i7 12700kf + Radeon Rx7900xt
 
 Install Genesis before running:  
-<https://github.com/Genesis-Embodied-AI/Genesis>
+<https://github.com/Genesis-Embodied-AI/Genesis>  
 install rsl-rl:    
 `git clone https://github.com/leggedrobotics/rsl_rl`  
 `cd rsl_rl && git checkout v1.0.2 && pip install -e .`  
