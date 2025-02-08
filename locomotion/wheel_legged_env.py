@@ -103,6 +103,7 @@ class WheelLeggedEnv:
             self.num_envs, 1
         )
         self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
+        self.history_obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
         self.rew_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
         self.reset_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         self.episode_length_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_int)
