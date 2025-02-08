@@ -4,9 +4,9 @@ Reinforcement learning of wheel-legged robots based on Genesis
 <https://github.com/Genesis-Embodied-AI/Genesis>
 
 运行项目：
-`git clone https://github.com/Albusgive/wheel_legged_genesis.git`
-`cd wheel_legged_genesis`
-训练：
-`python locomotion/wheel_legged_train.py`
-测试：
-`python locomotion/wheel_legged_eval.py`
+`git clone https://github.com/Albusgive/wheel_legged_genesis.git`  
+`cd wheel_legged_genesis`  
+训练：  
+`python locomotion/wheel_legged_train.py`  
+测试：  
+`python locomotion/wheel_legged_eval.py`  
