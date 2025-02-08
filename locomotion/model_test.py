@@ -26,8 +26,8 @@ plane = scene.add_entity(
     gs.morphs.Plane(),
 )
 franka = scene.add_entity(
-    gs.morphs.URDF(file="/home/albusgive/Genesis/genesis/assets/urdf/nz/urdf/nz.urdf",
-    pos=(0.0, 0.0, 0.22),
+    gs.morphs.URDF(file="assets/urdf/nz/urdf/nz.urdf",
+    pos=(0.0, 0.0, 0.13),
     ),
 )
 

@@ -13,9 +13,10 @@ class WheelLeggedEnv:
 
         self.num_envs = num_envs
         self.num_obs = obs_cfg["num_obs"]
+        self.num_slice_obs = obs_cfg["num_slice_obs"]
+        self.history_length = obs_cfg["history_length"]
         self.num_privileged_obs = None
         self.num_actions = env_cfg["num_actions"]
-        # 4 = env_cfg["num_pos_actions"]
         self.num_commands = command_cfg["num_commands"]
 
         self.simulate_action_latency = True  # there is a 1 step latency on real robot
@@ -102,8 +103,10 @@ class WheelLeggedEnv:
         self.global_gravity = torch.tensor([0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float).repeat(
             self.num_envs, 1
         )
+        self.slice_obs_buf = torch.zeros((self.num_envs, self.num_slice_obs), device=self.device, dtype=gs.tc_float)
+        self.history_obs_buf = torch.zeros((self.num_envs, self.history_length, self.num_slice_obs), device=self.device, dtype=gs.tc_float)
         self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
-        self.history_obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
+        self.history_idx = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
         self.rew_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
         self.reset_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         self.episode_length_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_int)
@@ -126,6 +129,8 @@ class WheelLeggedEnv:
             dtype=gs.tc_float,
         )
         self.extras = dict()  # extra information for logging
+        
+        print("self.obs_buf.size(): ",self.obs_buf.size())
 
     def _resample_commands(self, envs_idx):
         self.commands[envs_idx, 0] = gs_rand_float(*self.command_cfg["lin_vel_x_range"], (len(envs_idx),), self.device)
@@ -194,7 +199,7 @@ class WheelLeggedEnv:
         # print("commands",self.commands)
         # print("base_lin_vel",self.base_lin_vel[:,0])
         # print("base_ang_vel",self.base_ang_vel[:,2])
-        self.obs_buf = torch.cat(
+        self.slice_obs_buf = torch.cat(
             [
                 self.base_lin_acc * self.obs_scales["lin_acc"],  # 3
                 self.base_ang_vel * self.obs_scales["ang_vel"],  # 3
@@ -209,6 +214,13 @@ class WheelLeggedEnv:
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
 
+        # Update history buffer
+        self.history_obs_buf[:, self.history_idx] = self.slice_obs_buf  # Store the current observation in the history buffer
+        self.history_idx = (self.history_idx + 1) % self.history_length  # Increment and wrap around the index
+
+        # Combine the current observation with historical observations (e.g., along the time axis)
+        self.obs_buf = torch.cat([self.history_obs_buf, self.slice_obs_buf.unsqueeze(1)], dim=1).view(self.num_envs, -1)
+        
         return self.obs_buf, None, self.rew_buf, self.reset_buf, self.extras
 
     def get_observations(self):
@@ -265,7 +277,8 @@ class WheelLeggedEnv:
     def _reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
         lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
-        return torch.exp(-lin_vel_error / self.reward_cfg["tracking_sigma"])
+        # return torch.exp(-lin_vel_error / self.reward_cfg["tracking_sigma"])
+        return -lin_vel_error
 
     def _reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
