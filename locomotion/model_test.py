@@ -69,7 +69,7 @@ import numpy as np
 
 while True:
     # franka.control_dofs_position(
-    #         np.array([-0.785399, 1.3963, 0.785399, 1.3963, 0.0, 0.0]),
+    #         np.array([0.785399, 0.0, 0.785399, 0.0, 0.0, 0.0]),
     #         dofs_idx,
     #     )
     # scene.step()

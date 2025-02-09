@@ -193,12 +193,6 @@ class WheelLeggedEnv:
             self.episode_sums[name] += rew
 
         # compute observations
-        # self.commands[:, 0] = 0.0
-        # self.commands[:, 1] = 0.0
-        # self.commands[:, 2] = 0.0
-        # print("commands",self.commands)
-        # print("base_lin_vel",self.base_lin_vel[:,0])
-        # print("base_ang_vel",self.base_ang_vel[:,2])
         self.slice_obs_buf = torch.cat(
             [
                 self.base_lin_acc * self.obs_scales["lin_acc"],  # 3
@@ -277,8 +271,7 @@ class WheelLeggedEnv:
     def _reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
         lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
-        # return torch.exp(-lin_vel_error / self.reward_cfg["tracking_sigma"])
-        return -lin_vel_error
+        return torch.exp(-lin_vel_error / self.reward_cfg["tracking_sigma"])
 
     def _reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
@@ -313,4 +306,9 @@ class WheelLeggedEnv:
     def _reward_similar_legged(self):
         # 两侧腿相似 适合使用轮子行走 抑制劈岔
         legged_error = torch.sum(torch.square(self.dof_pos[:,0:2] - self.dof_pos[:,2:4]), dim=1)
-        return -legged_error
+        return torch.exp(-legged_error / 0.5)
+
+    
+    # def _reward_dof_some_pos(self):
+    #     #关节处于某个范围惩罚，避免总跪着
+        

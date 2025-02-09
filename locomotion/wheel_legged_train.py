@@ -16,12 +16,12 @@ def get_train_cfg(exp_name, max_iterations):
             "clip_param": 0.2,
             "desired_kl": 0.01,
             "entropy_coef": 0.01,
-            "gamma": 0.999,
+            "gamma": 0.995,
             "lam": 0.95,
-            "learning_rate": 0.003,
+            "learning_rate": 0.005,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
-            "num_mini_batches": 4,
+            "num_mini_batches": 10,
             "schedule": "adaptive",
             "use_clipped_value_loss": True,
             "value_loss_coef": 1.0,
@@ -29,9 +29,9 @@ def get_train_cfg(exp_name, max_iterations):
         "init_member_classes": {},
         "policy": {
             "activation": "elu",
-            "actor_hidden_dims": [512, 256, 128],
-            "critic_hidden_dims": [512, 256, 128],
-            "init_noise_std": 1.0,
+            "actor_hidden_dims": [512, 256, 256, 128],
+            "critic_hidden_dims": [512, 256, 256, 128],
+            "init_noise_std": 1.5,
         },
         "runner": {
             "algorithm_class_name": "PPO",
@@ -135,26 +135,26 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_sigma": 0.01,
+        "tracking_sigma": 0.25,
         "feet_height_target": 0.0,
         "reward_scales": {
             "tracking_lin_vel": 2.0,
-            "tracking_ang_vel": 0.3,
-            "tracking_base_height": 5.0,
+            "tracking_ang_vel": 0.5,
+            "tracking_base_height": 50.0,
             "lin_vel_z": -0.1,
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.0001,
             "similar_to_default": 0.0,
-            "projected_gravity": 4,
-            "similar_legged": 0.5,
+            "projected_gravity": 6,
+            "similar_legged": 0.4,
         },
     }
     command_cfg = {
         "num_commands": 4,
-        "lin_vel_x_range": [-5.0, 5.0],
+        "lin_vel_x_range": [-3.0, 3.0],
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-1.0, 1.0],
-        "height_target_range": [0.2 , 0.34],
+        "height_target_range": [0.25 , 0.3],
     }
 
     return env_cfg, obs_cfg, reward_cfg, command_cfg
@@ -164,7 +164,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=3000)
+    parser.add_argument("--max_iterations", type=int, default=5000)
     args = parser.parse_args()
 
     gs.init(logging_level="warning",backend=gs.vulkan)

@@ -11,7 +11,7 @@ import genesis as gs
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=100)
+    parser.add_argument("--ckpt", type=int, default=4000)
     args = parser.parse_args()
 
     gs.init(backend=gs.vulkan)
@@ -43,7 +43,7 @@ def main():
             # obs[:,7]=0.0 * -2.0
             # obs[:,8]=0.0 * 0.25
             # obs[:,9]=0.31
-            print("obs_cmd",obs[:,6:10])
+            # print("obs_cmd",obs[:,6:10])
             # print("obs_cmd",obs[:,9])
             
 
