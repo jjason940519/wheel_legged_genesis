@@ -18,10 +18,10 @@ def get_train_cfg(exp_name, max_iterations):
             "entropy_coef": 0.01,
             "gamma": 0.995,
             "lam": 0.95,
-            "learning_rate": 0.005,
+            "learning_rate": 0.001,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
-            "num_mini_batches": 10,
+            "num_mini_batches": 4,
             "schedule": "adaptive",
             "use_clipped_value_loss": True,
             "value_loss_coef": 1.0,
@@ -29,9 +29,9 @@ def get_train_cfg(exp_name, max_iterations):
         "init_member_classes": {},
         "policy": {
             "activation": "elu",
-            "actor_hidden_dims": [512, 256, 256, 128],
-            "critic_hidden_dims": [512, 256, 256, 128],
-            "init_noise_std": 1.5,
+            "actor_hidden_dims": [512, 256, 128],
+            "critic_hidden_dims": [512, 256, 128],
+            "init_noise_std": 1.0,
         },
         "runner": {
             "algorithm_class_name": "PPO",
@@ -83,11 +83,11 @@ def get_cfgs():
         # lower upper
         "dof_limit": {
             # "left_hip_joint":[-0.31416, 0.31416],
-            "left_thigh_joint": [-0.785399, 0.785399],
-            "left_calf_joint": [0.0, 1.3963],
+            "left_thigh_joint": [-1.0472, 0.5236],
+            "left_calf_joint": [-1.3963, 1.3963],   #[0.0, 1.3963]
             # "right_hip_joint":[-0.31416, 0.31416],
-            "right_thigh_joint": [-0.785399, 0.785399],
-            "right_calf_joint": [0.0, 1.3963],
+            "right_thigh_joint": [-1.0472, 0.5236],
+            "right_calf_joint": [-1.3963, 1.3963],
             "left_wheel_joint": [0.0, 0.0],
             "right_wheel_joint": [0.0, 0.0],
         },
@@ -102,15 +102,15 @@ def get_cfgs():
             "right_wheel_joint": 12.0,
         },
         # PD
-        "kp": 40.0,
-        "kd": 5,
+        "kp": 20.0,
+        "kd": 0.5,
         # termination
         "termination_if_roll_greater_than": 10,  # degree
-        "termination_if_pitch_greater_than": 10,
-        "termination_if_base_height_greater_than": 0.10,
+        "termination_if_pitch_greater_than": 20,
+        "termination_if_base_height_greater_than": 0.1,
         "termination_base_height_time": 1.0,
         # base pose
-        "base_init_pos": [0.0, 0.0, 0.13], #[0.0, 0.0, 0.3]
+        "base_init_pos": [0.0, 0.0, 0.15],
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
         "episode_length_s": 30.0,
         "resampling_time_s": 4.0,
@@ -121,9 +121,9 @@ def get_cfgs():
     }
     obs_cfg = {
         # num_obs = num_slice_obs + history_num * num_slice_obs
-        "num_obs": 174, #在rsl-rl中使用的变量为num_obs表示state数量
+        "num_obs": 87, #在rsl-rl中使用的变量为num_obs表示state数量
         "num_slice_obs": 29,
-        "history_length": 5,
+        "history_length": 2,
         "obs_scales": {
             "lin_vel": 2.0,
             "lin_acc": 2.0,
@@ -135,18 +135,18 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_sigma": 0.25,
+        "tracking_sigma": 0.01,
         "feet_height_target": 0.0,
         "reward_scales": {
-            "tracking_lin_vel": 2.0,
-            "tracking_ang_vel": 0.5,
-            "tracking_base_height": 50.0,
-            "lin_vel_z": -0.1,
+            "tracking_lin_vel": 3.0,
+            "tracking_ang_vel": 3.0,
+            "tracking_base_height": 20.0,
+            "lin_vel_z": -0.0,
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.0001,
             "similar_to_default": 0.0,
-            "projected_gravity": 6,
-            "similar_legged": 0.4,
+            "projected_gravity": 3,
+            "similar_legged": 2.0,
         },
     }
     command_cfg = {
@@ -154,7 +154,7 @@ def get_cfgs():
         "lin_vel_x_range": [-3.0, 3.0],
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-1.0, 1.0],
-        "height_target_range": [0.25 , 0.3],
+        "height_target_range": [0.25 , 0.32],
     }
 
     return env_cfg, obs_cfg, reward_cfg, command_cfg

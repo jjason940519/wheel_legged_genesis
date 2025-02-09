@@ -11,7 +11,7 @@ import genesis as gs
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=4000)
+    parser.add_argument("--ckpt", type=int, default=4500)
     args = parser.parse_args()
 
     gs.init(backend=gs.vulkan)

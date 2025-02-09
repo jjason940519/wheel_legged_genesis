@@ -20,7 +20,7 @@ class WheelLeggedEnv:
         self.num_commands = command_cfg["num_commands"]
 
         self.simulate_action_latency = True  # there is a 1 step latency on real robot
-        self.dt = 0.02  # control frequency on real robot is 50hz
+        self.dt = 0.01  # control frequency on real robot is 100hz
         self.max_episode_length = math.ceil(env_cfg["episode_length_s"] / self.dt)
 
         self.env_cfg = env_cfg
@@ -59,7 +59,7 @@ class WheelLeggedEnv:
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
-                file="assets/urdf/nz/urdf/nz.urdf",
+                file="assets/urdf/nz2/urdf/nz2.urdf",
                 pos=self.base_init_pos.cpu().numpy(),
                 quat=self.base_init_quat.cpu().numpy(),
             ),
