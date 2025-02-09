@@ -28,4 +28,5 @@ When using NVIDIA GPUs, it is recommended that the genesis backend choose gpu or
 When using AMD GPUs, it is recommended to select vulkan for the genesis backend  
 ## Demo of the effect    
 [25赛季平衡底盘仿真](https://www.bilibili.com/video/BV1DUNHe7EjP/?share_source=copy_web>)  
-[别平步了，要不双足吧](https://www.bilibili.com/video/BV1oSN8eUEXw/?share_source=copy_web>)    
+[别平步了，要不双足吧](https://www.bilibili.com/video/BV1oSN8eUEXw/?share_source=copy_web>) 
+[这是平步模式了](https://www.bilibili.com/video/BV1YoNDevENT/?share_source=copy_web>)
