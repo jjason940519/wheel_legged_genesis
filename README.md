@@ -14,7 +14,7 @@ install rsl-rl:
 `git clone https://github.com/leggedrobotics/rsl_rl`  
 `cd rsl_rl && git checkout v1.0.2 && pip install -e .`  
 install tensorboard:    
-`pip install tensorboard`
+`pip install tensorboard`  
 install taichi:  
 `pip install taichi`  
 install Imath:  
