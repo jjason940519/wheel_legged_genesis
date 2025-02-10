@@ -43,7 +43,7 @@ def main():
             # obs[:,7]=0.0 * -2.0
             # obs[:,8]=0.0 * 0.25
             # obs[:,9]=0.31
-            # print("obs_cmd",obs[:,6:10])
+            print("obs_cmd",obs[:,9:13])
             # print("obs_cmd",obs[:,9])
             
 

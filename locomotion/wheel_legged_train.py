@@ -138,15 +138,15 @@ def get_cfgs():
         "tracking_sigma": 0.01,
         "feet_height_target": 0.0,
         "reward_scales": {
-            "tracking_lin_vel": 3.0,
-            "tracking_ang_vel": 3.0,
+            "tracking_lin_vel": 1.5,
+            "tracking_ang_vel": 1.0,
             "tracking_base_height": 20.0,
             "lin_vel_z": -0.0,
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.0001,
             "similar_to_default": 0.0,
             "projected_gravity": 3,
-            "similar_legged": 2.0,
+            "similar_legged": 3.0,
         },
     }
     command_cfg = {
