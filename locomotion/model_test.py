@@ -26,9 +26,13 @@ plane = scene.add_entity(
     gs.morphs.Plane(),
 )
 franka = scene.add_entity(
-    gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
-    pos=(0.0, 0.0, 0.15),
+    # gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
+    # pos=(0.0, 0.0, 0.15)
+    # ),
+    gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+    pos=(0.0, 0.0, 0.265)
     ),
+    vis_mode='collision'
 )
 
 cam = scene.add_camera(
@@ -68,11 +72,11 @@ franka.set_dofs_kv(
 import numpy as np
 
 while True:
-    # franka.control_dofs_position(
-    #         np.array([0.785399, -1.3963, 0.785399, -1.3963, 0.0, 0.0]),
-    #         dofs_idx,
-    #     )
-    # scene.step()
+    franka.control_dofs_position(
+            np.array([0.785399, 1.3963, 0.785399, 1.3963, 0.0, 0.0]),
+            dofs_idx,
+        )
+    scene.step()
     # print(franka.get_pos())
     cam.render()
 # cam.stop_recording(save_to_filename='video.mp4', fps=60)

@@ -104,9 +104,9 @@ def get_cfgs():
         # PD
         "kp": 20.0,
         "kd": 0.5,
-        # termination
+        # termination 角度制    obs的angv弧度制
         "termination_if_roll_greater_than": 10,  # degree
-        "termination_if_pitch_greater_than": 10,
+        "termination_if_pitch_greater_than": 20,
         "termination_if_base_height_greater_than": 0.1,
         "termination_base_height_time": 1.0,
         # base pose
@@ -121,8 +121,8 @@ def get_cfgs():
     }
     obs_cfg = {
         # num_obs = num_slice_obs + history_num * num_slice_obs
-        "num_obs": 87, #在rsl-rl中使用的变量为num_obs表示state数量
-        "num_slice_obs": 29,
+        "num_obs": 78, #在rsl-rl中使用的变量为num_obs表示state数量
+        "num_slice_obs": 26,
         "history_length": 2,
         "obs_scales": {
             "lin_vel": 2.0,
@@ -144,14 +144,14 @@ def get_cfgs():
             "tracking_lin_vel": 3.0,
             "tracking_ang_vel": 1.0,
             "tracking_base_height": 30.0,
-            "lin_vel_z": -0.0,
-            "joint_action_rate": -0.0003,
+            "lin_vel_z": -0.001,
+            "joint_action_rate": -0.005,
             "wheel_action_rate": -0.0001,
             "similar_to_default": 0.0,
-            "projected_gravity": 1.0,
+            "projected_gravity": 5,
             "similar_legged": 1.0,
-            "lin_acc": 0.001,
-            "lin_ang_acc": 0.001,
+            "lin_acc": 0.0,
+            "lin_ang_acc": 0.0,
         },
     }
     command_cfg = {
@@ -161,6 +161,7 @@ def get_cfgs():
         "ang_vel_range": [-0.0, 0.0],
         "height_target_range": [0.22 , 0.32],
     }
+    #TO DO 根据每个奖励函数的奖励值来判断是否开启下一次课程，下一次课程重置每个奖励函数的缩放
     class_cfg = {
         "class1": 1.5,
         "class2": 0.0,
@@ -176,7 +177,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=5000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.gpu)
+    gs.init(logging_level="warning",backend=gs.vulkan)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg = get_cfgs()

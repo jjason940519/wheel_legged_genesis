@@ -69,17 +69,19 @@
 
   <default>
     <default class="visual">
-      <geom contype="0" conaffinity="0" group="2" />
+      <!-- <geom contype="0" conaffinity="0" group="2" /> -->
+      <geom />
     </default>
     <default class="collision">
-      <geom group="1" />
+      <!-- <geom group="1" /> -->
+      <geom />
     </default>
   </default>
 
   <worldbody>
 
     <body name="nz" pos="0 0 1">
-      <!-- <freejoint /> -->
+      <freejoint />
       <!-- <geom type="mesh" mesh="Brrrrt" material="fiberglass" euler="0 1.57 0" pos="-0.3 0 0.20" mass="0.001"/> -->
       <geom type="mesh" mesh="Up" material="fiberglass" mass="0.57936 " />
       <geom type="mesh" mesh="BaseFrontGlass" material="fiberglass" mass="0.48487" class="collision" />
@@ -125,7 +127,7 @@
 
       <!-- 左腿 -->
       <body name="left_hip" pos="0.10634 0.09839 -0.070">
-        <joint name="left_hip_joint" type="hinge" axis="1 0 0" />
+        <!-- <joint name="left_hip_joint" type="hinge" axis="1 0 0" /> -->
         <geom type="mesh" mesh="LeftHipMotor" condim="1" material="dmmotor" mass="1.8"
           class="visual" />
         <geom type="mesh" mesh="LeftHipBase" condim="1" material="fiberglass" mass="0.72633"
@@ -142,7 +144,7 @@
           <geom type="mesh" mesh="LeftThighBearing" material="metal" mass="0.13" class="collision" />
 
           <!-- 连杆 -->
-          <body name="left_thigh_pitman1" pos="0 0.0165 0">
+          <!-- <body name="left_thigh_pitman1" pos="0 0.0165 0">
             <joint type="hinge" axis="0 1 0" />
             <geom type="mesh" mesh="LeftThighPitman1" material="fiberglass" mass="0.022"
               class="collision" />
@@ -153,7 +155,7 @@
               <geom type="mesh" mesh="LeftThighPitman2" material="metal"
                 mass="0.15" class="collision" />
             </body>
-          </body>
+          </body> -->
 
           <!-- 小腿 -->
           <body name="left_calf" pos="-0.0015 0.019 -0.17999" euler="0 -1.5707963267948966192313216 0">
@@ -200,7 +202,7 @@
 
       <!-- 右腿 -->
       <body name="right_hip" pos="0.10834 -0.10161 -0.07">
-        <joint name="right_hip_joint" type="hinge" axis="1 0 0"  />
+        <!-- <joint name="right_hip_joint" type="hinge" axis="1 0 0"  /> -->
         <geom type="mesh" mesh="RightHipMotor" condim="1" material="dmmotor" mass="1.8"
           class="visual" />
         <geom type="mesh" mesh="RightHipBase" condim="1" material="fiberglass" mass="0.72633"
@@ -217,7 +219,7 @@
           <geom type="mesh" mesh="RightThighBearing" material="metal" mass="0.13" class="collision" />
 
           <!-- 连杆 -->
-          <body name="right_thigh_pitman1" pos="0 -0.0165 0">
+          <!-- <body name="right_thigh_pitman1" pos="0 -0.0165 0">
             <joint type="hinge" axis="0 1 0" />
             <geom type="mesh" mesh="RightThighPitman1" material="fiberglass" mass="0.022"
               class="collision" />
@@ -227,7 +229,7 @@
                 rgba="0 1 0 1" />
               <geom type="mesh" mesh="RightThighPitman2" material="metal" mass="0.15" class="collision" />
             </body>
-          </body>
+          </body> -->
 
           <!-- 小腿 -->
           <body name="right_calf" pos="-0.00248 -0.019 -0.17998" euler="0 -1.5707963267948966192313216 0">
@@ -274,7 +276,7 @@
     </body>
   </worldbody>
 
-  <equality>
+  <!-- <equality>
     <connect site1="left_pitman_site1" site2="left_pitman_site2" />
     <connect site1="right_pitman_site1" site2="right_pitman_site2" />
   </equality>
@@ -288,5 +290,5 @@
     <position joint="right_thigh_joint" name="right_thigh_joint" kp="80" kv="2" ctrlrange="-0.785399 0.785399"/>
     <position joint="right_calf_joint" name="right_calf_joint" kp="80" kv="2" ctrlrange="0 6"/>
     <motor joint="right_wheel_joint" name="right_wheel_joint" />
-  </actuator>
+  </actuator> -->
 </mujoco>

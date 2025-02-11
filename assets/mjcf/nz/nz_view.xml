@@ -73,10 +73,10 @@
 
   <default>
     <default class="visual">
-      <geom contype="0" conaffinity="0" group="2"/>
+      <!-- <geom contype="0" conaffinity="0" group="2"/> -->
     </default>
     <default class="collision">
-      <geom group="1"/>
+      <!-- <geom group="1"/> -->
     </default>
   </default>
 

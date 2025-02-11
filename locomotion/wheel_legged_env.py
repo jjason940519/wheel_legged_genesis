@@ -64,6 +64,12 @@ class WheelLeggedEnv:
                 quat=self.base_init_quat.cpu().numpy(),
             ),
         )
+        # self.base_init_pos = torch.tensor((0.0, 0.0, 0.265),device=self.device)
+        # self.robot = self.scene.add_entity(
+        #     gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+        #     pos=self.base_init_pos.cpu().numpy()),
+        #     vis_mode='collision'
+        # )
 
         # build
         self.scene.build(n_envs=num_envs)
@@ -100,8 +106,10 @@ class WheelLeggedEnv:
 
         # initialize buffers
         self.base_lin_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
+        self.last_base_lin_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.base_lin_acc = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.base_ang_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
+        self.last_base_ang_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.base_ang_acc = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.projected_gravity = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.global_gravity = torch.tensor([0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float).repeat(self.num_envs, 1)
@@ -163,12 +171,15 @@ class WheelLeggedEnv:
         )
         inv_base_quat = inv_quat(self.base_quat)
         self.base_lin_vel[:] = transform_by_quat(self.robot.get_vel(), inv_base_quat)
-        self.base_lin_acc[:] = self.base_lin_vel[:] / self.dt
+        self.base_lin_acc[:] = (self.base_lin_vel[:] - self.last_base_lin_vel[:])/ self.dt
         self.base_ang_vel[:] = transform_by_quat(self.robot.get_ang(), inv_base_quat)
-        self.base_ang_acc[:] = self.base_ang_vel[:] / self.dt
+        self.base_ang_acc[:] = (self.base_ang_vel[:] - self.last_base_ang_vel[:]) / self.dt
         self.projected_gravity = transform_by_quat(self.global_gravity, inv_base_quat)
         self.dof_pos[:] = self.robot.get_dofs_position(self.motor_dofs)
         self.dof_vel[:] = self.robot.get_dofs_velocity(self.motor_dofs)
+        # update last
+        self.last_base_lin_vel[:] = self.base_lin_vel[:]
+        self.last_base_ang_vel[:] = self.base_ang_vel[:]
 
         # resample commands
         envs_idx = (
@@ -195,10 +206,15 @@ class WheelLeggedEnv:
             self.episode_sums[name] += rew
         self.class_value = self.rew_buf.mean()
         
+        # self.commands[:0] = 2.5
+        # self.commands[:1] = 0
+        # self.commands[:2] = 0
+        # self.commands[:3] = 0.28
+        # print("base_lin_vel",self.base_lin_vel[:,0])
         # compute observations
         self.slice_obs_buf = torch.cat(
             [
-                self.base_lin_acc * self.obs_scales["lin_acc"],  # 3
+                # self.base_lin_acc * self.obs_scales["lin_acc"],  # 3
                 self.base_ang_vel * self.obs_scales["ang_vel"],  # 3
                 self.projected_gravity,  # 3
                 self.commands * self.commands_scale,  # 4
@@ -326,11 +342,11 @@ class WheelLeggedEnv:
 
     # def _reward_dof_some_pos(self):
     #     #关节处于某个范围惩罚，避免总跪着
-    
+
     def _reward_lin_acc(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square(self.base_ang_vel))
+        return torch.sum(torch.square(self.base_lin_acc))
 
     def _reward_lin_ang_acc(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square(self.base_ang_vel))
+        return torch.sum(torch.square(self.base_ang_acc))
