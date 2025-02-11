@@ -11,20 +11,21 @@ import genesis as gs
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=5000)
+    parser.add_argument("--ckpt", type=int, default=3300)
     args = parser.parse_args()
 
-    gs.init(backend=gs.vulkan)
+    gs.init(backend=gs.gpu)
 
     log_dir = f"logs/{args.exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
-    reward_cfg["reward_scales"] = {}
+    env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
+    # reward_cfg["reward_scales"] = {} #why
     env = WheelLeggedEnv(
         num_envs=1,
         env_cfg=env_cfg,
         obs_cfg=obs_cfg,
         reward_cfg=reward_cfg,
         command_cfg=command_cfg,
+        class_cfg=class_cfg,
         show_viewer=True,
     )
 
@@ -43,7 +44,7 @@ def main():
             # obs[:,7]=0.0 * -2.0
             # obs[:,8]=0.0 * 0.25
             # obs[:,9]=0.31
-            print("obs_cmd",obs[:,9:13])
+            # print("obs_cmd",obs[:,9:13])
             # print("obs_cmd",obs[:,9])
             
 

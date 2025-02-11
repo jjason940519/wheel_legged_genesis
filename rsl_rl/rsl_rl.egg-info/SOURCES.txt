@@ -1,5 +1,3 @@
-LICENSE
-README.md
 setup.py
 rsl_rl/__init__.py
 rsl_rl.egg-info/PKG-INFO

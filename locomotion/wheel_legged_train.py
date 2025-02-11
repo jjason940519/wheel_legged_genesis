@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 24,
+            "num_steps_per_env": 24,    #每轮仿真多少step
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -84,10 +84,10 @@ def get_cfgs():
         "dof_limit": {
             # "left_hip_joint":[-0.31416, 0.31416],
             "left_thigh_joint": [-1.0472, 0.5236],
-            "left_calf_joint": [-1.3963, 1.3963],   #[0.0, 1.3963]
+            "left_calf_joint": [0, 1.3963],   #[0.0, 1.3963]
             # "right_hip_joint":[-0.31416, 0.31416],
             "right_thigh_joint": [-1.0472, 0.5236],
-            "right_calf_joint": [-1.3963, 1.3963],
+            "right_calf_joint": [0, 1.3963],
             "left_wheel_joint": [0.0, 0.0],
             "right_wheel_joint": [0.0, 0.0],
         },
@@ -106,7 +106,7 @@ def get_cfgs():
         "kd": 0.5,
         # termination
         "termination_if_roll_greater_than": 10,  # degree
-        "termination_if_pitch_greater_than": 20,
+        "termination_if_pitch_greater_than": 10,
         "termination_if_base_height_greater_than": 0.1,
         "termination_base_height_time": 1.0,
         # base pose
@@ -130,34 +130,43 @@ def get_cfgs():
             "ang_vel": 0.25,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
-            "height_measurements": 5.0,
+            "height_measurements": 10.0,
         },
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_sigma": 0.01,
+        "tracking_lin_sigma": 2, #因为-3 - 3
+        "tracking_ang_sigma": 0.25, #因为-1 - 1
+        "tracking_height_sigma": 0.003, #因为0.1 err
+        "tracking_gravity_sigma": 0.01, #因为0.2 err
         "feet_height_target": 0.0,
         "reward_scales": {
-            "tracking_lin_vel": 1.5,
+            "tracking_lin_vel": 3.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 20.0,
+            "tracking_base_height": 30.0,
             "lin_vel_z": -0.0,
-            "joint_action_rate": -0.005,
+            "joint_action_rate": -0.0003,
             "wheel_action_rate": -0.0001,
             "similar_to_default": 0.0,
-            "projected_gravity": 3,
-            "similar_legged": 3.0,
+            "projected_gravity": 1.0,
+            "similar_legged": 1.0,
+            "lin_acc": 0.001,
+            "lin_ang_acc": 0.001,
         },
     }
     command_cfg = {
         "num_commands": 4,
         "lin_vel_x_range": [-3.0, 3.0],
         "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-1.0, 1.0],
-        "height_target_range": [0.25 , 0.32],
+        "ang_vel_range": [-0.0, 0.0],
+        "height_target_range": [0.22 , 0.32],
+    }
+    class_cfg = {
+        "class1": 1.5,
+        "class2": 0.0,
     }
 
-    return env_cfg, obs_cfg, reward_cfg, command_cfg
+    return env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg
 
 
 def main():
@@ -167,10 +176,10 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=5000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
 
     log_dir = f"logs/{args.exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs()
+    env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg = get_cfgs()
     train_cfg = get_train_cfg(args.exp_name, args.max_iterations)
 
     if os.path.exists(log_dir):
@@ -178,13 +187,13 @@ def main():
     os.makedirs(log_dir, exist_ok=True)
 
     env = WheelLeggedEnv(
-        num_envs=args.num_envs, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, command_cfg=command_cfg
+        num_envs=args.num_envs, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, command_cfg=command_cfg, class_cfg=class_cfg
     )
 
     runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
 
     pickle.dump(
-        [env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg],
+        [env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg, train_cfg],
         open(f"{log_dir}/cfgs.pkl", "wb"),
     )
 
