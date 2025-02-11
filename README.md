@@ -10,15 +10,14 @@ NVIDIA/AMD GPU or CPU
 ## Before running
 Install Genesis:  
 <https://github.com/Genesis-Embodied-AI/Genesis>  
-install rsl-rl:    
-`git clone https://github.com/leggedrobotics/rsl_rl`  
-`cd rsl_rl && git checkout v1.0.2 && pip install -e .`  
 install tensorboard:    
 `pip install tensorboard`  
 ## Use
 run:  
 `git clone https://github.com/Albusgive/wheel_legged_genesis.git`  
 `cd wheel_legged_genesis`  
+install rsl-rl:    
+`cd rsl_rl && git checkout v1.0.2 && pip install -e .`  
 train:  
 `python locomotion/wheel_legged_train.py`  
 test:  
