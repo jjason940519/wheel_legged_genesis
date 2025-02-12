@@ -62,7 +62,8 @@ class OnPolicyRunner:
         actor_critic: ActorCritic = actor_critic_class( self.env.num_obs,
                                                         num_critic_obs,
                                                         self.env.num_actions,
-                                                        **self.policy_cfg).to(self.device)
+                                                        **self.policy_cfg,
+                                                        ).to(self.device)
         alg_class = eval(self.cfg["algorithm_class_name"]) # PPO
         self.alg: PPO = alg_class(actor_critic, device=self.device, **self.alg_cfg)
         self.num_steps_per_env = self.cfg["num_steps_per_env"]

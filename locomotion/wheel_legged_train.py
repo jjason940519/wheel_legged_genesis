@@ -29,9 +29,9 @@ def get_train_cfg(exp_name, max_iterations):
         "init_member_classes": {},
         "policy": {
             "activation": "elu",
-            "actor_hidden_dims": [512, 256, 128],
-            "critic_hidden_dims": [512, 256, 128],
-            "init_noise_std": 1.0,
+            "actor_hidden_dims": [128, 64, 32],
+            "critic_hidden_dims": [259, 128, 64],
+            "init_noise_std": 10.0,
         },
         "runner": {
             "algorithm_class_name": "PPO",
@@ -102,11 +102,11 @@ def get_cfgs():
             "right_wheel_joint": 12.0,
         },
         # PD
-        "kp": 20.0,
-        "kd": 0.5,
+        "kp": 30.0,
+        "kd": 1.2,
         # termination 角度制    obs的angv弧度制
         "termination_if_roll_greater_than": 10,  # degree
-        "termination_if_pitch_greater_than": 20,
+        "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
         "termination_if_base_height_greater_than": 0.1,
         "termination_base_height_time": 1.0,
         # base pose
@@ -138,20 +138,23 @@ def get_cfgs():
         "tracking_lin_sigma": 2, #因为-3 - 3
         "tracking_ang_sigma": 0.25, #因为-1 - 1
         "tracking_height_sigma": 0.003, #因为0.1 err
-        "tracking_gravity_sigma": 0.01, #因为0.2 err
+        "tracking_gravity_sigma": 1.0, #因为0.2 err
+        "tracking_similar_legged_sigma": 0.5,
         "feet_height_target": 0.0,
+        "default_base_height": 0.26,
         "reward_scales": {
             "tracking_lin_vel": 3.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 30.0,
+            "tracking_base_height": 20.0,
             "lin_vel_z": -0.001,
             "joint_action_rate": -0.005,
-            "wheel_action_rate": -0.0001,
+            "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
             "projected_gravity": 5,
-            "similar_legged": 1.0,
+            "similar_legged": 0.5,  #数值太高会导致前期不站立，直接坐下，但是数值较低会劈岔，但是很多项目并没有相关奖励
             "lin_acc": 0.0,
-            "lin_ang_acc": 0.0,
+            "ang_acc": -2e-8,
+            "dof_acc": -2.5e-5,
         },
     }
     command_cfg = {
@@ -159,14 +162,19 @@ def get_cfgs():
         "lin_vel_x_range": [-3.0, 3.0],
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-0.0, 0.0],
-        "height_target_range": [0.22 , 0.32],
+        # "height_target_range": [0.22 , 0.32],
+        "height_target_range": [0.325 , 0.425],
     }
-    #TO DO 根据每个奖励函数的奖励值来判断是否开启下一次课程，下一次课程重置每个奖励函数的缩放
+    #
     class_cfg = {
-        "class1": 1.5,
-        "class2": 0.0,
+        "class1_value": 4.5,
+        "class2_value": 16.0,
     }
-
+    #域随机化
+    domain_rand = {
+        "rand_base_mass": [-1.0 , 1.0]
+        
+    }
     return env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg
 
 
@@ -177,7 +185,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=5000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg = get_cfgs()

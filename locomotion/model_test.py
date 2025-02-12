@@ -26,12 +26,12 @@ plane = scene.add_entity(
     gs.morphs.Plane(),
 )
 franka = scene.add_entity(
-    # gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
-    # pos=(0.0, 0.0, 0.15)
-    # ),
-    gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
-    pos=(0.0, 0.0, 0.265)
+    gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
+    pos=(0.0, 0.0, 0.15)
     ),
+    # gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+    # pos=(0.0, 0.0, 0.265)
+    # ),
     vis_mode='collision'
 )
 
