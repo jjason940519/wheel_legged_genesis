@@ -12,13 +12,13 @@ import time
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=1700)
+    parser.add_argument("--ckpt", type=int, default=0)
     args = parser.parse_args()
 
-    gs.init(backend=gs.gpu)
+    gs.init(backend=gs.vulkan)
 
     log_dir = f"logs/{args.exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
+    env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg, domain_rand_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
     # reward_cfg["reward_scales"] = {} #why？
     env = WheelLeggedEnv(
         num_envs=1,
@@ -27,6 +27,7 @@ def main():
         reward_cfg=reward_cfg,
         command_cfg=command_cfg,
         class_cfg=class_cfg,
+        domain_rand_cfg=domain_rand_cfg,
         show_viewer=True,
     )
 
