@@ -8,7 +8,7 @@ def gs_rand_float(lower, upper, shape, device):
     return (upper - lower) * torch.rand(size=shape, device=device) + lower
     
 class WheelLeggedEnv:
-    def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg, domain_rand_cfg, show_viewer=False, device="cuda"):
+    def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, show_viewer=False, device="cuda"):
         self.device = torch.device(device)
 
         self.num_envs = num_envs
@@ -18,6 +18,7 @@ class WheelLeggedEnv:
         self.num_privileged_obs = None
         self.num_actions = env_cfg["num_actions"]
         self.num_commands = command_cfg["num_commands"]
+        self.curriculum_cfg = curriculum_cfg
 
         self.simulate_action_latency = True  # there is a 1 step latency on real robot
         self.dt = 0.01  # control frequency on real robot is 100hz
@@ -101,8 +102,12 @@ class WheelLeggedEnv:
             self.reward_functions[name] = getattr(self, "_reward_" + name)
             self.episode_sums[name] = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
 
-        self.class_value = torch.zeros(1, device=self.device, dtype=gs.tc_float)
-        self.class1 = 0.8 * (self.reward_scales["projected_gravity"] + self.reward_scales["tracking_base_height"] + self.reward_scales["similar_legged"])
+        # prepare curriculum reward functions and multiply reward scales by dt
+        self.curriculum_reward_functions = dict()
+        for name in self.curriculum_cfg["curriculum_reward"]:
+            self.curriculum_reward_functions[name] = getattr(self, "_reward_" + name)
+        self.curriculum_value = torch.zeros(1, device=self.device, dtype=gs.tc_float)
+        self.curriculum1 = 0.8 * (self.reward_scales["projected_gravity"] + self.reward_scales["tracking_base_height"] + self.reward_scales["similar_legged"])
 
         # initialize buffers
         self.base_lin_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
@@ -119,6 +124,7 @@ class WheelLeggedEnv:
         self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
         self.history_idx = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
         self.rew_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
+        self.curriculum_rew_buf = torch.zeros_like(self.rew_buf)
         self.reset_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         self.episode_length_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_int)
         self.commands = torch.zeros((self.num_envs, self.num_commands), device=self.device, dtype=gs.tc_float)
@@ -144,12 +150,13 @@ class WheelLeggedEnv:
         self.right_knee = self.robot.get_joint("right_calf_joint")
         self.left_knee_pos = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.right_knee_pos = torch.zeros_like(self.left_knee_pos)
+        self.connect_force = torch.zeros((self.num_envs,self.robot.n_links, 3), device=self.device, dtype=gs.tc_float)
         self.extras = dict()  # extra information for logging
         
         print("self.obs_buf.size(): ",self.obs_buf.size())
 
     def _resample_commands(self, envs_idx):
-        if(self.class_value > self.class1):
+        if(self.curriculum_value > self.curriculum1):
             self.commands[envs_idx, 0] = gs_rand_float(*self.command_cfg["lin_vel_x_range"], (len(envs_idx),), self.device)
             self.commands[envs_idx, 1] = gs_rand_float(*self.command_cfg["lin_vel_y_range"], (len(envs_idx),), self.device)
             self.commands[envs_idx, 2] = gs_rand_float(*self.command_cfg["ang_vel_range"], (len(envs_idx),), self.device)
@@ -187,6 +194,8 @@ class WheelLeggedEnv:
         #获取膝关节高度
         self.left_knee_pos[:] = self.left_knee.get_pos()
         self.right_knee_pos[:] = self.right_knee.get_pos()
+        #碰撞力
+        self.connect_force = self.robot.get_links_net_contact_force()
         
         # update last
         self.last_base_lin_vel[:] = self.base_lin_vel[:]
@@ -215,18 +224,25 @@ class WheelLeggedEnv:
             rew = reward_func() * self.reward_scales[name]
             self.rew_buf += rew
             self.episode_sums[name] += rew
-        self.class_value = self.rew_buf.mean()
+            
+        # compute curriculum reward
+        self.curriculum_rew_buf[:] = 0.0
+        for name, reward_func in self.curriculum_reward_functions.items():
+            rew = reward_func() * self.reward_scales[name]
+            self.curriculum_rew_buf += rew
+        self.curriculum_value = self.curriculum_rew_buf.mean()
         
-        # self.commands[0, 0] = torch.abs(self.commands[0, 0])
-        # self.commands[0,1] = 0.0
-        # self.commands[0,2] = 0.0
+        self.commands[0, 0] = 1.0
+        self.commands[0,1] = 0.0
+        self.commands[0,2] = 0.0
         # self.commands[0, 2] = gs_rand_float(*self.command_cfg["ang_vel_range"], (len(0),), self.device)
-        # print("commands",self.commands)
-        # print("base_lin_vel",self.base_lin_vel[:,0])
+        print("commands",self.commands)
+        print("base_lin_vel",self.base_lin_vel[:,0])
+        print("base_ang_vel",self.base_ang_vel[:, 2])
         # compute observations
         self.slice_obs_buf = torch.cat(
             [
-                # self.base_lin_acc * self.obs_scales["lin_acc"],  # 3
+                self.base_lin_vel * self.obs_scales["lin_vel"],  # 3
                 self.base_ang_vel * self.obs_scales["ang_vel"],  # 3
                 self.projected_gravity,  # 3
                 self.commands * self.commands_scale,  # 4
@@ -302,22 +318,25 @@ class WheelLeggedEnv:
         self.reset_buf = self.episode_length_buf > self.max_episode_length
         self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
         self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
-        self.reset_buf |= torch.abs(self.base_pos[:, 2]) < self.env_cfg["termination_if_base_height_greater_than"]
+        # self.reset_buf |= torch.abs(self.base_pos[:, 2]) < self.env_cfg["termination_if_base_height_greater_than"]
         #特殊姿态重置
-        self.reset_buf |= torch.abs(self.left_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
-        self.reset_buf |= torch.abs(self.right_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
-
+        # self.reset_buf |= torch.abs(self.left_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
+        # self.reset_buf |= torch.abs(self.right_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
+        if(self.env_cfg["termination_if_base_connect_plane_than"]):
+            self.reset_buf |= torch.square(self.connect_force[:,0,:]).sum(dim=1) > 0
+        
+        
     # ------------ reward functions----------------
     def _reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
-        if(self.class_value > self.class1):
+        if(self.curriculum_value > self.curriculum1):
             lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
             return torch.exp(-lin_vel_error / self.reward_cfg["tracking_lin_sigma"])
         return torch.zeros(1, device=self.device, dtype=gs.tc_float)
 
     def _reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
-        if(self.class_value > self.class1):
+        if(self.curriculum_value > self.curriculum1):
             ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
             return torch.exp(-ang_vel_error / self.reward_cfg["tracking_ang_sigma"])
         return torch.zeros(1, device=self.device, dtype=gs.tc_float)
@@ -343,14 +362,15 @@ class WheelLeggedEnv:
         # Penalize joint poses far away from default pose
         #个人认为为了灵活性这个作用性不大
         return torch.sum(torch.abs(self.dof_pos[:,0:4] - self.default_dof_pos[0:4]), dim=1)
-    
+
     def _reward_projected_gravity(self):
-        # 这是奖励函数，并非观测，所以保持水平奖励使用重力投影
+        #保持水平奖励使用重力投影 0 0 -1
         #使用e^(-x^2)效果不是很好
-        # projected_gravity_error = 1 + self.projected_gravity[:, 2]
-        projected_gravity_error = torch.square(self.projected_gravity[:, :2])
-        # return torch.exp(-projected_gravity_error / self.reward_cfg["tracking_gravity_sigma"])
-        return torch.sum(projected_gravity_error, dim=1)
+        projected_gravity_error = 1 + self.projected_gravity[:, 2] #[0, 0.2]
+        projected_gravity_error = torch.square(projected_gravity_error)
+        # projected_gravity_error = torch.square(self.projected_gravity[:,2])
+        return torch.exp(-projected_gravity_error / self.reward_cfg["tracking_gravity_sigma"])
+        # return torch.sum(projected_gravity_error)
 
     def _reward_similar_legged(self):
         # 两侧腿相似 适合使用轮子行走 抑制劈岔，要和_reward_knee_height结合使用
@@ -363,14 +383,22 @@ class WheelLeggedEnv:
         below_threshold+=(torch.abs(self.right_knee_pos[:,2]) < 0.1).float()
         return below_threshold
 
-    def _reward_lin_acc(self):
-        # Penalize z axis base linear velocity
-        return torch.sum(torch.square(self.base_lin_acc))
-
-    def _reward_ang_acc(self):
-        # Penalize z axis base linear velocity
-        return torch.sum(torch.square(self.base_ang_acc))
+    def _reward_dof_vel(self):
+        # Penalize dof velocities
+        return torch.sum(torch.square(self.dof_vel[:, :4]), dim=1)
 
     def _reward_dof_acc(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square((self.dof_vel - self.last_dof_vel)*self.dt))
+        return torch.sum(torch.square((self.dof_vel - self.last_dof_vel)/self.dt))
+
+    def _reward_dof_force(self):
+        # Penalize z axis base linear velocity
+        return torch.sum(torch.square(self.dof_force), dim=1)
+
+    def _reward_ang_vel_xy(self):
+        # Penalize xy axes base angular velocity
+        return torch.sum(torch.square(self.base_ang_vel[:, :2]), dim=1)
+
+    def _reward_collision(self):
+        # 接触地面惩罚 力越大惩罚越大
+        return torch.square(self.connect_force[:,0,:]).sum(dim=1)

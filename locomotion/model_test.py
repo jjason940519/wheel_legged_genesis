@@ -79,9 +79,12 @@ while True:
     #         np.array([0.785399, 1.3963, 0.785399, 1.3963, 0.0, 0.0]),
     #         dofs_idx,
     #     )
-    # scene.step()
+    scene.step()
     # print(franka.get_pos())
-    left_knee_pos = left_knee.get_pos()
-    print("left_knee_pos    ",left_knee_pos)
+    # left_knee_pos = left_knee.get_pos()
+    # print("left_knee_pos    ",left_knee_pos)
+    force = franka.get_links_net_contact_force()
+    print("force:",force[0])
+    time.sleep(0.1)
     cam.render()
 # cam.stop_recording(save_to_filename='video.mp4', fps=60)
