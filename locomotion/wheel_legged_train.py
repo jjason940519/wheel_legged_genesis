@@ -108,7 +108,7 @@ def get_cfgs():
         "termination_if_roll_greater_than": 10,  # degree
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
         "termination_if_base_height_greater_than": 0.1,
-        "termination_if_knee_height_greater_than": 0.05,
+        "termination_if_knee_height_greater_than": 0.00,
         "termination_base_height_time": 1.0,
         # base pose
         "base_init_pos": [0.0, 0.0, 0.15],
@@ -146,17 +146,17 @@ def get_cfgs():
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 1.0,
-            "lin_vel_z": -2.0,
+            "tracking_base_height": 1.2,
+            "lin_vel_z": -0.02,
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
-            "projected_gravity": -10,
-            "similar_legged": 0.0,  #数值太高会导致前期不站立，直接坐下，但是数值较低会劈岔，但是很多项目并没有相关奖励
+            "projected_gravity": -10.0,
+            "similar_legged": 0.5, 
             "lin_acc": 0.0,
             "ang_acc": -2e-8,
             "dof_acc": -2.5e-5,
-            # "knee_height": 0.0,
+            "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔，稳定运行
         },
     }
     command_cfg = {
@@ -184,10 +184,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=5000)
+    parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, class_cfg, domain_rand_cfg = get_cfgs()

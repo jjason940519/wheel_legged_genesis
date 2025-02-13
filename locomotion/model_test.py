@@ -1,5 +1,6 @@
 import genesis as gs
 import numpy as np
+import time
 gs.init(backend=gs.vulkan)
 
 scene = gs.Scene(
@@ -32,7 +33,7 @@ franka = scene.add_entity(
     # gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
     # pos=(0.0, 0.0, 0.265)
     # ),
-    vis_mode='collision'
+    # vis_mode='collision'
 )
 
 cam = scene.add_camera(
@@ -63,6 +64,8 @@ franka.set_dofs_kv(
     kv = np.array([5,5,5,5,5,5]),
     dofs_idx_local = dofs_idx,
 )
+left_knee = franka.get_joint("left_calf_joint")
+
 
 
 # 渲染rgb、深度、分割掩码和法线图
@@ -72,11 +75,13 @@ franka.set_dofs_kv(
 import numpy as np
 
 while True:
-    franka.control_dofs_position(
-            np.array([0.785399, 1.3963, 0.785399, 1.3963, 0.0, 0.0]),
-            dofs_idx,
-        )
-    scene.step()
+    # franka.control_dofs_position(
+    #         np.array([0.785399, 1.3963, 0.785399, 1.3963, 0.0, 0.0]),
+    #         dofs_idx,
+    #     )
+    # scene.step()
     # print(franka.get_pos())
+    left_knee_pos = left_knee.get_pos()
+    print("left_knee_pos    ",left_knee_pos)
     cam.render()
 # cam.stop_recording(save_to_filename='video.mp4', fps=60)
