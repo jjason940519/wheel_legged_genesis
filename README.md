@@ -12,6 +12,7 @@ Install Genesis:
 <https://github.com/Genesis-Embodied-AI/Genesis>  
 install tensorboard:    
 `pip install tensorboard`  
+`pip install pygame`   
 ## Use
 run:  
 `git clone https://github.com/Albusgive/wheel_legged_genesis.git`  
