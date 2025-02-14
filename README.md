@@ -18,7 +18,7 @@ run:
 `git clone https://github.com/Albusgive/wheel_legged_genesis.git`  
 `cd wheel_legged_genesis`  
 install rsl-rl:    
-`cd rsl_rl && git checkout v1.0.2 && pip install -e .`  
+`cd rsl_rl && pip install -e .`  
 train:  
 `python locomotion/wheel_legged_train.py`  
 test:  
