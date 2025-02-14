@@ -1,0 +1,21 @@
+[project]
+name = "wheel_legged_genesis"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "", email = ""},
+]
+dependencies = [
+    "genesis-world>=0.2.1",
+    "tensorboard>=2.19.0",
+    "pygame>=2.6.1",
+    "torch>=2.6.0",
+    "rsl-rl @ file:///${PROJECT_ROOT}/rsl_rl",
+]
+requires-python = ">=3.10,<3.13"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
