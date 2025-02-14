@@ -11,6 +11,8 @@ class WheelLeggedEnv:
     def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, show_viewer=False, device="cuda"):
         self.device = torch.device(device)
 
+        self.mode = True   #True训练模式开启
+        
         self.num_envs = num_envs
         self.num_obs = obs_cfg["num_obs"]
         self.num_slice_obs = obs_cfg["num_slice_obs"]
@@ -164,6 +166,12 @@ class WheelLeggedEnv:
             self.commands[envs_idx] = torch.zeros(self.num_commands, device=self.device, dtype=gs.tc_float)
         self.commands[envs_idx, 3] = gs_rand_float(*self.command_cfg["height_target_range"], (len(envs_idx),), self.device)
 
+    def set_commands(self,envs_idx,commands):
+        self.commands[envs_idx]=torch.tensor(commands,device=self.device, dtype=gs.tc_float)
+
+    def eval(self):
+        self.mode = False
+        
     def step(self, actions):
         self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])
         exec_actions = self.last_actions if self.simulate_action_latency else self.actions
@@ -207,7 +215,6 @@ class WheelLeggedEnv:
             .nonzero(as_tuple=False)
             .flatten()
         )
-        self._resample_commands(envs_idx)
 
         # check termination and reset
         self.check_termination()
@@ -232,13 +239,13 @@ class WheelLeggedEnv:
             self.curriculum_rew_buf += rew
         self.curriculum_value = self.curriculum_rew_buf.mean()
         
-        self.commands[0, 0] = 1.0
-        self.commands[0,1] = 0.0
-        self.commands[0,2] = 0.0
-        # self.commands[0, 2] = gs_rand_float(*self.command_cfg["ang_vel_range"], (len(0),), self.device)
-        print("commands",self.commands)
-        print("base_lin_vel",self.base_lin_vel[:,0])
-        print("base_ang_vel",self.base_ang_vel[:, 2])
+        if(self.mode):
+            self._resample_commands(envs_idx)
+        # else:
+            # print("sim system",self.base_lin_vel[0,0])
+            # self.base_lin_vel[0,0] = -0.076 * (self.dof_vel[0,4]+self.dof_vel[0,5])/2
+            # print("clc system",self.base_lin_vel[0,0])
+            
         # compute observations
         self.slice_obs_buf = torch.cat(
             [
@@ -316,13 +323,14 @@ class WheelLeggedEnv:
 
     def check_termination(self):
         self.reset_buf = self.episode_length_buf > self.max_episode_length
-        self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
-        self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
+        if(self.mode):
+            self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
+            self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
         # self.reset_buf |= torch.abs(self.base_pos[:, 2]) < self.env_cfg["termination_if_base_height_greater_than"]
         #特殊姿态重置
         # self.reset_buf |= torch.abs(self.left_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
         # self.reset_buf |= torch.abs(self.right_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
-        if(self.env_cfg["termination_if_base_connect_plane_than"]):
+        if(self.env_cfg["termination_if_base_connect_plane_than"]&self.mode):
             self.reset_buf |= torch.square(self.connect_force[:,0,:]).sum(dim=1) > 0
         
         

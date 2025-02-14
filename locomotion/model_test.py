@@ -57,11 +57,11 @@ jnt_names = [
 ]
 dofs_idx = [franka.get_joint(name).dof_idx_local for name in jnt_names]
 franka.set_dofs_kp(
-    kp = np.array([20,20,20,20,20,20]),
+    kp = np.array([20,20,20,20,40,40]),
     dofs_idx_local = dofs_idx,
 )
 franka.set_dofs_kv(
-    kv = np.array([5,5,5,5,5,5]),
+    kv = np.array([0.5,0.5,0.5,0.5,0.5,0.5]),
     dofs_idx_local = dofs_idx,
 )
 left_knee = franka.get_joint("left_calf_joint")
@@ -75,16 +75,17 @@ left_knee = franka.get_joint("left_calf_joint")
 import numpy as np
 
 while True:
-    # franka.control_dofs_position(
-    #         np.array([0.785399, 1.3963, 0.785399, 1.3963, 0.0, 0.0]),
-    #         dofs_idx,
-    #     )
+    franka.control_dofs_position(
+            np.array([0.0, 0.0, 0.0, 0.0, 10.0, 10.0]),
+            dofs_idx,
+        )
     scene.step()
     # print(franka.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)
-    force = franka.get_links_net_contact_force()
-    print("force:",force[0])
-    time.sleep(0.1)
+    # force = franka.get_links_net_contact_force()
+    # dof_vel = franka.get_dofs_velocity()
+    # print("dof_vel:",dof_vel)
+    # time.sleep(0.1)
     cam.render()
 # cam.stop_recording(save_to_filename='video.mp4', fps=60)

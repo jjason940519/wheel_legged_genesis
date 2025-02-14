@@ -145,7 +145,7 @@ def get_cfgs():
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
             "tracking_base_height": 1.2,
-            "lin_vel_z": -0.02,
+            "lin_vel_z": -0.02, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
@@ -154,20 +154,19 @@ def get_cfgs():
             "dof_vel": -5e-5,
             "dof_acc": -1.25e-8,
             "dof_force": -0.0001,
-            "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔，稳定运行
+            "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.05,
             "collision": -1.0,  #base接触地面碰撞力越大越惩罚
         },
     }
     command_cfg = {
         "num_commands": 4,
-        "lin_vel_x_range": [-1.0, 1.0],
+        "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-1.0, 1.0],
+        "ang_vel_range": [-1.0, 1.0],   #修改范围要调整奖励权重
         "height_target_range": [0.22 , 0.32],
-        # "height_target_range": [0.325 , 0.425],
     }
-    # 课程学习，奖励循序渐进
+    # 课程学习，奖励循序渐进 待优化
     curriculum_cfg = {
         "curriculum_reward": {
             "tracking_base_height",
@@ -175,10 +174,9 @@ def get_cfgs():
             "similar_legged", 
         },
     }
-    #域随机化
+    #域随机化   TO DO未完成
     domain_rand_cfg = {
         "rand_base_mass": [-1.0 , 1.0]
-        
     }
     return env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg
 
@@ -190,7 +188,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.cuda)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()
