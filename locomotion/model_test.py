@@ -27,13 +27,13 @@ plane = scene.add_entity(
     gs.morphs.Plane(),
 )
 franka = scene.add_entity(
-    gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
-    pos=(0.0, 0.0, 0.15)
-    ),
-    # gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
-    # pos=(0.0, 0.0, 0.265)
+    # gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
+    # pos=(0.0, 0.0, 0.15)
     # ),
-    # vis_mode='collision'
+    gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+    pos=(0.0, 0.0, 0.265)
+    ),
+    vis_mode='collision'
 )
 
 cam = scene.add_camera(
@@ -43,7 +43,7 @@ cam = scene.add_camera(
     fov    = 30,
     GUI    = False,
 )
-scene.build()
+scene.build(n_envs=2)
 
 jnt_names = [
     # "left_hip_joint",
@@ -65,7 +65,6 @@ franka.set_dofs_kv(
     dofs_idx_local = dofs_idx,
 )
 left_knee = franka.get_joint("left_calf_joint")
-
 
 
 # 渲染rgb、深度、分割掩码和法线图

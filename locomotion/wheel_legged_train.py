@@ -60,6 +60,17 @@ def get_cfgs():
     env_cfg = {
         "num_actions": 6,
         # joint/link names
+        "link_names":[
+            "base_link",
+            "left_calf_link",
+            "left_hip_link",
+            "left_thigh_link",
+            "left_wheel_link",
+            "right_calf_link",
+            "right_hip_link",
+            "right_thigh_link",
+            "right_wheel_link",
+        ],
         "default_joint_angles": {  # [rad]
             # "left_hip_joint":0.0,
             "left_thigh_joint": 0.0,
@@ -174,9 +185,13 @@ def get_cfgs():
             "similar_legged", 
         },
     }
-    #域随机化   TO DO未完成
-    domain_rand_cfg = {
-        "rand_base_mass": [-1.0 , 1.0]
+    #域随机化 friction_ratio是范围波动 mass和com是偏移波动
+    domain_rand_cfg = { 
+        "friction_ratio_range":[1.0 , 1.0],
+        "random_mass_shift":0.5,
+        "random_com_shift":0.05,
+        "dof_damping_range":[0.0 , 0.0],
+        "dof_stiffness_range":[0.0 , 0.0],
     }
     return env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg
 
@@ -188,7 +203,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.cuda)
+    gs.init(logging_level="warning",backend=gs.vulkan)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()

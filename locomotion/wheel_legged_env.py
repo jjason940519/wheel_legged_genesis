@@ -21,6 +21,7 @@ class WheelLeggedEnv:
         self.num_actions = env_cfg["num_actions"]
         self.num_commands = command_cfg["num_commands"]
         self.curriculum_cfg = curriculum_cfg
+        self.domain_rand_cfg = domain_rand_cfg
 
         self.simulate_action_latency = True  # there is a 1 step latency on real robot
         self.dt = 0.01  # control frequency on real robot is 100hz
@@ -60,19 +61,19 @@ class WheelLeggedEnv:
         self.base_init_pos = torch.tensor(self.env_cfg["base_init_pos"], device=self.device)
         self.base_init_quat = torch.tensor(self.env_cfg["base_init_quat"], device=self.device)
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
-        self.robot = self.scene.add_entity(
-            gs.morphs.URDF(
-                file="assets/urdf/nz2/urdf/nz2.urdf",
-                pos=self.base_init_pos.cpu().numpy(),
-                quat=self.base_init_quat.cpu().numpy(),
-            ),
-        )
-        # self.base_init_pos = torch.tensor((0.0, 0.0, 0.265),device=self.device)
         # self.robot = self.scene.add_entity(
-        #     gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
-        #     pos=self.base_init_pos.cpu().numpy()),
-        #     vis_mode='collision'
+        #     gs.morphs.URDF(
+        #         file="assets/urdf/nz2/urdf/nz2.urdf",
+        #         pos=self.base_init_pos.cpu().numpy(),
+        #         quat=self.base_init_quat.cpu().numpy(),
+        #     ),
         # )
+        self.base_init_pos = torch.tensor((0.0, 0.0, 0.265),device=self.device)
+        self.robot = self.scene.add_entity(
+            gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+            pos=self.base_init_pos.cpu().numpy()),
+            vis_mode='collision'
+        )
 
         # build
         self.scene.build(n_envs=num_envs)
@@ -155,6 +156,13 @@ class WheelLeggedEnv:
         self.connect_force = torch.zeros((self.num_envs,self.robot.n_links, 3), device=self.device, dtype=gs.tc_float)
         self.extras = dict()  # extra information for logging
         
+        #域随机化 domain_rand_cfg
+        self.friction_ratio_low = self.domain_rand_cfg["friction_ratio_range"][0]
+        self.friction_ratio_range = self.domain_rand_cfg["friction_ratio_range"][1] - self.friction_ratio_low
+        self.dof_damping_low = self.domain_rand_cfg["dof_damping_range"][0]
+        self.dof_damping_range = self.domain_rand_cfg["dof_damping_range"][1] - self.friction_ratio_low
+        self.dof_stiffness_low = self.domain_rand_cfg["dof_stiffness_range"][0]
+        self.dof_stiffness_range = self.domain_rand_cfg["dof_stiffness_range"][1] - self.friction_ratio_low
         print("self.obs_buf.size(): ",self.obs_buf.size())
 
     def _resample_commands(self, envs_idx):
@@ -315,6 +323,7 @@ class WheelLeggedEnv:
             self.episode_sums[key][envs_idx] = 0.0
 
         self._resample_commands(envs_idx)
+        # self.domain_rand(envs_idx)
 
     def reset(self):
         self.reset_buf[:] = True
@@ -333,6 +342,32 @@ class WheelLeggedEnv:
         if(self.env_cfg["termination_if_base_connect_plane_than"]&self.mode):
             self.reset_buf |= torch.square(self.connect_force[:,0,:]).sum(dim=1) > 0
         
+    def domain_rand(self, envs_idx):
+        friction_ratio = self.friction_ratio_low + self.friction_ratio_range * torch.rand(len(envs_idx), self.robot.n_links)
+        self.robot.set_friction_ratio(friction_ratio=friction_ratio,
+                                      link_indices=np.arange(0, self.robot.n_links),
+                                      envs_idx = envs_idx)
+        
+        mass_shift = -self.domain_rand_cfg["random_mass_shift"]/2 + self.domain_rand_cfg["random_mass_shift"]*torch.rand(len(envs_idx), self.robot.n_links)
+        self.robot.set_mass_shift(mass_shift=mass_shift,
+                                  link_indices=np.arange(0, self.robot.n_links),
+                                  envs_idx = envs_idx)
+        
+        com_shift = -self.domain_rand_cfg["random_com_shift"]/2+self.domain_rand_cfg["random_com_shift"]*torch.rand(len(envs_idx), self.robot.n_links, 3)
+        self.robot.set_COM_shift(com_shift=com_shift,
+                                 link_indices=np.arange(0, self.robot.n_links),
+                                 envs_idx = envs_idx)
+        
+        # damping = self.dof_damping_low+self.dof_damping_range * torch.rand(len(envs_idx), self.robot.n_dofs)
+        # self.robot.set_dofs_damping(damping=damping, 
+        #                            dofs_idx_local=np.arange(0, self.robot.n_dofs), 
+        #                            envs_idx=envs_idx)
+
+        # stiffness = self.dof_stiffness_low+self.dof_stiffness_range * torch.rand(len(envs_idx), self.robot.n_dofs)
+        # self.robot.set_dofs_stiffness(stiffness=stiffness, 
+        #                            dofs_idx_local=np.arange(0, self.robot.n_dofs), 
+        #                            envs_idx=envs_idx)
+    
         
     # ------------ reward functions----------------
     def _reward_tracking_lin_vel(self):
