@@ -61,19 +61,19 @@ class WheelLeggedEnv:
         self.base_init_pos = torch.tensor(self.env_cfg["base_init_pos"], device=self.device)
         self.base_init_quat = torch.tensor(self.env_cfg["base_init_quat"], device=self.device)
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
-        self.robot = self.scene.add_entity(
-            gs.morphs.URDF(
-                file="assets/urdf/nz2/urdf/nz2.urdf",
-                pos=self.base_init_pos.cpu().numpy(),
-                quat=self.base_init_quat.cpu().numpy(),
-            ),
-        )
-        # self.base_init_pos = torch.tensor((0.0, 0.0, 0.265),device=self.device)
         # self.robot = self.scene.add_entity(
-        #     gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
-        #     pos=self.base_init_pos.cpu().numpy()),
-        #     vis_mode='collision'
+        #     gs.morphs.URDF(
+        #         file="assets/urdf/nz2/urdf/nz2.urdf",
+        #         pos=self.base_init_pos.cpu().numpy(),
+        #         quat=self.base_init_quat.cpu().numpy(),
+        #     ),
         # )
+        self.base_init_pos = torch.tensor((0.0, 0.0, 0.265),device=self.device)
+        self.robot = self.scene.add_entity(
+            gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+            pos=self.base_init_pos.cpu().numpy()),
+            vis_mode='collision'
+        )
 
         # build
         self.scene.build(n_envs=num_envs)

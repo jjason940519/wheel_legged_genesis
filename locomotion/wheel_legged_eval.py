@@ -37,14 +37,14 @@ def main():
     policy = runner.get_inference_policy(device="cuda:0")
 
     obs, _ = env.reset()
-    env.eval()  #测试模式   没有手柄就不要开了
+    env.eval()  #测试模式
     pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,1.0])
     with torch.no_grad():
         while True:
             actions = policy(obs)
             obs, _, rews, dones, infos = env.step(actions)
             comands = pad.get_commands()
-            env.set_commands(0,comands)
+            env.set_commands(0,comands) #没有pad就在这里传入一个控制命令
             
 
 

@@ -190,8 +190,8 @@ def get_cfgs():
         "friction_ratio_range":[1.0 , 1.0],
         "random_mass_shift":0.5,
         "random_com_shift":0.05,
-        # "dof_damping_range":[0.0 , 0.0], # genesis bug
-        # "dof_stiffness_range":[0.0 , 0.0], # genesis bug
+        "dof_damping_range":[0.0 , 0.0], # genesis bug
+        "dof_stiffness_range":[0.0 , 0.0], # genesis bug
     }
     return env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg
 
