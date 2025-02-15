@@ -323,7 +323,8 @@ class WheelLeggedEnv:
             self.episode_sums[key][envs_idx] = 0.0
 
         self._resample_commands(envs_idx)
-        # self.domain_rand(envs_idx)
+        if self.mode:
+            self.domain_rand(envs_idx)
 
     def reset(self):
         self.reset_buf[:] = True
@@ -358,6 +359,7 @@ class WheelLeggedEnv:
                                  link_indices=np.arange(0, self.robot.n_links),
                                  envs_idx = envs_idx)
         
+        # genesis bug
         # damping = self.dof_damping_low+self.dof_damping_range * torch.rand(len(envs_idx), self.robot.n_dofs)
         # self.robot.set_dofs_damping(damping=damping, 
         #                            dofs_idx_local=np.arange(0, self.robot.n_dofs), 
