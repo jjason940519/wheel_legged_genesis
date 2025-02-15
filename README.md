@@ -2,6 +2,7 @@
 Reinforcement learning of wheel-legged robots based on Genesis  
 ## System Requirements  
 Ubuntu 20.04/22.04/24.04  
+python >= 3.10
 ## Hardware requirements  
 NVIDIA/AMD GPU or CPU  
 ## Test & Development Platform  
