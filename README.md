@@ -19,10 +19,10 @@ run:
 `cd wheel_legged_genesis`  
 install rsl-rl:    
 `cd rsl_rl && pip install -e .`  
-train:  
-`python locomotion/wheel_legged_train.py`  
 test:  
 `python locomotion/wheel_legged_eval.py`  
+train:  
+`python locomotion/wheel_legged_train.py`  
 ## Suggestion
 When using NVIDIA GPUs, it is recommended that the genesis backend choose gpu or cuda    
 When using AMD GPUs, it is recommended to select vulkan for the genesis backend  
