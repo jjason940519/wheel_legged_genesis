@@ -8,13 +8,14 @@ NVIDIA/AMD GPU or CPU
 1. i5 12400f +  Geforce RTX4070  
 2. i7 12700kf + Radeon Rx7900xt
 ## Before running
-Clone repo, run:  
+### 1. Clone repo
+run:  
 ```
 git clone https://github.com/Albusgive/wheel_legged_genesis.git
 cd wheel_legged_genesis
 ```
 
-### install deps
+### 2. install deps
 #### use pdm install
 Install pdm, <https://pdm-project.org/en/latest/#installation>, then run
 ```
@@ -36,7 +37,7 @@ install rsl-rl:
 test:  
 `pdm run locomotion/wheel_legged_eval.py`  
 train:  
-`pdm run  locomotion/wheel_legged_train.py`  
+`pdm run locomotion/wheel_legged_train.py`  
 
 ### or manual
 test:  
