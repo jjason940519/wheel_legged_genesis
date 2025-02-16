@@ -12,10 +12,10 @@ import gamepad
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=600)
+    parser.add_argument("--ckpt", type=int, default=2400)
     args = parser.parse_args()
 
-    gs.init(backend=gs.gpu)
+    gs.init(backend=gs.vulkan)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
@@ -38,12 +38,13 @@ def main():
 
     obs, _ = env.reset()
     env.eval()  #测试模式
-    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,1.0])
+    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14])
     with torch.no_grad():
         while True:
             actions = policy(obs)
             obs, _, rews, dones, infos = env.step(actions)
             comands = pad.get_commands()
+            # print("comands: ",comands)
             env.set_commands(0,comands) #没有pad就在这里传入一个控制命令
             
 

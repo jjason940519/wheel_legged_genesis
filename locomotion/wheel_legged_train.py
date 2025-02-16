@@ -29,8 +29,8 @@ def get_train_cfg(exp_name, max_iterations):
         "init_member_classes": {},
         "policy": {
             "activation": "elu",
-            "actor_hidden_dims": [128, 64, 32],
-            "critic_hidden_dims": [259, 128, 64],
+            "actor_hidden_dims": [512, 256, 128],
+            "critic_hidden_dims": [512, 256, 128],
             "init_noise_std": 1.0,
         },
         "runner": {
@@ -148,14 +148,16 @@ def get_cfgs():
     # 名字和奖励函数名一一对应
     reward_cfg = {
         "tracking_lin_sigma": 0.25, 
+        "tracking_lin_sigma2": 0.01, 
         "tracking_ang_sigma": 0.25, 
-        "tracking_height_sigma": 0.001,
+        "tracking_ang_sigma2": 0.01, 
+        "tracking_height_sigma": 0.0015,
         "tracking_similar_legged_sigma": 0.5,
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
-            "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 1.0,
-            "tracking_base_height": 1.2,
+            "tracking_lin_vel": 0.5,
+            "tracking_ang_vel": 0.5,
+            "tracking_base_height": 1.0,
             "lin_vel_z": -0.02, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
@@ -172,9 +174,9 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 4,
-        "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
+        "lin_vel_x_range": [-3.0, 3.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-1.0, 1.0],   #修改范围要调整奖励权重
+        "ang_vel_range": [-6.28, 6.28],   #修改范围要调整奖励权重
         "height_target_range": [0.22 , 0.32],
     }
     # 课程学习，奖励循序渐进 待优化
@@ -184,11 +186,13 @@ def get_cfgs():
             "projected_gravity",
             "similar_legged", 
         },
+        "curriculum_lin_vel_step":0.05,   #百分比
+        "curriculum_ang_vel_step":0.05,   #百分比
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
-        "friction_ratio_range":[1.0 , 1.0],
-        "random_mass_shift":0.5,
+        "friction_ratio_range":[0.8 , 1.2],
+        "random_mass_shift":0.2,
         "random_com_shift":0.05,
         "dof_damping_range":[0.0 , 0.0], # genesis bug
         "dof_stiffness_range":[0.0 , 0.0], # genesis bug
@@ -203,7 +207,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.gpu)
+    gs.init(logging_level="warning",backend=gs.vulkan)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()

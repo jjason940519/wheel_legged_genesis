@@ -14,7 +14,7 @@ class control_gamepad:
             self.joystick.init()
             print(f"link gamepad: {self.joystick.get_name()}")
         self.num_commands = command_cfg["num_commands"]
-        self.command_cfg = command_cfg
+        self.command_ = command_cfg
         self.commands = np.zeros(self.num_commands)
         self.command_scale = command_scale
         if self.command_scale is None:
@@ -30,13 +30,16 @@ class control_gamepad:
             elif event.type == pygame.JOYBUTTONUP:
                 print(f"按钮 {event.button} 被释放。")
             elif event.type == pygame.JOYAXISMOTION:
+                # print(f"轴 {event.axis},{event.value}")
                 match event.axis:
                     case 1: #ly 前正后负
                         self.commands[0] = -event.value * self.command_scale[0]
                     case 2: #rx 左正右负
                         self.commands[2] = -event.value * self.command_scale[2]
-                    case 5: #ry 前正后负
-                        self.commands[3] += -event.value/50
+                    case 3: #lt 增加身高
+                        self.commands[3] += (event.value+1)/100
+                    case 4: #ry 减少身高
+                        self.commands[3] -= (event.value+1)/100
         self.commands_clip()
         return self.commands
     

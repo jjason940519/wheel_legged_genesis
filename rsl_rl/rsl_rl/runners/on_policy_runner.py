@@ -172,6 +172,8 @@ class OnPolicyRunner:
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
+        self.writer.add_scalar('Curriculum/lin_vel_range', self.env.command_cfg["lin_vel_x_range"][1], locs['it'])
+        self.writer.add_scalar('Curriculum/ang_vel_range', self.env.command_cfg["ang_vel_range"][1], locs['it'])
         if len(locs['rewbuffer']) > 0:
             self.writer.add_scalar('Train/mean_reward', statistics.mean(locs['rewbuffer']), locs['it'])
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['lenbuffer']), locs['it'])
@@ -204,6 +206,9 @@ class OnPolicyRunner:
                         #   f"""{'Mean episode length/episode:':>{pad}} {locs['mean_trajectory_length']:.2f}\n""")
 
         log_string += ep_string
+        log_string += (f"""{'#' * width}\n"""
+                          f"""{'lin_vel_range:':>{pad}} {self.env.command_cfg["lin_vel_x_range"][1]}\n"""
+                          f"""{'ang_vel_range:':>{pad}} {self.env.command_cfg["lin_vel_x_range"][1]}\n""")
         log_string += (f"""{'-' * width}\n"""
                        f"""{'Total timesteps:':>{pad}} {self.tot_timesteps}\n"""
                        f"""{'Iteration time:':>{pad}} {iteration_time:.2f}s\n"""
