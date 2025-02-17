@@ -147,30 +147,30 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.2, 
-        "tracking_lin_sigma2": 0.005, 
-        "tracking_ang_sigma": 0.2, 
-        "tracking_ang_sigma2": 0.005, 
+        "tracking_lin_sigma": 0.25, 
+        "tracking_lin_sigma2": 0.001, 
+        "tracking_ang_sigma": 0.25, 
+        "tracking_ang_sigma2": 0.001, 
         "tracking_height_sigma": 0.0015,
         "tracking_similar_legged_sigma": 0.5,
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 1.0,
+            "tracking_ang_vel": 0.5,
             "tracking_base_height": 1.2,
             "lin_vel_z": -0.02, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
             "projected_gravity": 5.0,
-            "similar_legged": 1.0,
+            "similar_legged": 0.5,
             "dof_vel": -2.5e-7,
             "dof_acc": -1.25e-8,
             "dof_force": -0.0001,
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.05,
             "collision": -1.0,  #base接触地面碰撞力越大越惩罚
-            "lift_feet": -1.0,
+            # "lift_feet": -1.0, 
         },
     }
     command_cfg = {
@@ -212,7 +212,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.gpu)
+    gs.init(logging_level="warning",backend=gs.vulkan)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()

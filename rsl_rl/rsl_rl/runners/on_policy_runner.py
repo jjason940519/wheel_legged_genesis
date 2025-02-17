@@ -123,7 +123,7 @@ class OnPolicyRunner:
                         lenbuffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
                         cur_reward_sum[new_ids] = 0
                         cur_episode_length[new_ids] = 0
-
+                self.env.curriculum_commands(self.num_steps_per_env)
                 stop = time.time()
                 collection_time = stop - start
 
