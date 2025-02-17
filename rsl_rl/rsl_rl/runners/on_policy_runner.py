@@ -208,7 +208,7 @@ class OnPolicyRunner:
         log_string += ep_string
         log_string += (f"""{'#' * width}\n"""
                           f"""{'lin_vel_range:':>{pad}} {self.env.command_cfg["lin_vel_x_range"][1]}\n"""
-                          f"""{'ang_vel_range:':>{pad}} {self.env.command_cfg["lin_vel_x_range"][1]}\n""")
+                          f"""{'ang_vel_range:':>{pad}} {self.env.command_cfg["ang_vel_range"][1]}\n""")
         log_string += (f"""{'-' * width}\n"""
                        f"""{'Total timesteps:':>{pad}} {self.tot_timesteps}\n"""
                        f"""{'Iteration time:':>{pad}} {iteration_time:.2f}s\n"""

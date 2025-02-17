@@ -147,15 +147,15 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.25, 
-        "tracking_lin_sigma2": 0.01, 
-        "tracking_ang_sigma": 0.25, 
-        "tracking_ang_sigma2": 0.01, 
+        "tracking_lin_sigma": 0.2, 
+        "tracking_lin_sigma2": 0.005, 
+        "tracking_ang_sigma": 0.2, 
+        "tracking_ang_sigma2": 0.005, 
         "tracking_height_sigma": 0.0015,
         "tracking_similar_legged_sigma": 0.5,
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
-            "tracking_lin_vel": 0.5,
+            "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 0.5,
             "tracking_base_height": 1.0,
             "lin_vel_z": -0.02, #大了影响高度变换速度
@@ -164,7 +164,7 @@ def get_cfgs():
             "similar_to_default": 0.0,
             "projected_gravity": 5.0,
             "similar_legged": 0.5, 
-            "dof_vel": -5e-5,
+            "dof_vel": -2.5e-7,
             "dof_acc": -1.25e-8,
             "dof_force": -0.0001,
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
@@ -186,14 +186,18 @@ def get_cfgs():
             "projected_gravity",
             "similar_legged", 
         },
-        "curriculum_lin_vel_step":0.05,   #百分比
-        "curriculum_ang_vel_step":0.05,   #百分比
+        "curriculum_lin_vel_step":0.01,   #百分比
+        "curriculum_ang_vel_step":0.01,   #百分比
+        "curriculum_lin_vel_min_range":0.3,   #百分比
+        "curriculum_ang_vel_min_range":0.15,   #百分比
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
         "friction_ratio_range":[0.8 , 1.2],
         "random_mass_shift":0.2,
         "random_com_shift":0.05,
+        "random_KP":[0.9, 1.1],
+        "random_KD":[0.9, 1.1],
         "dof_damping_range":[0.0 , 0.0], # genesis bug
         "dof_stiffness_range":[0.0 , 0.0], # genesis bug
     }

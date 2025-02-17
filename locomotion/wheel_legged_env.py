@@ -256,6 +256,7 @@ class WheelLeggedEnv:
         
         if(self.mode):
             self._resample_commands(envs_idx)
+            self.curriculum_commands()
         else:
             print("base_ang_vel: ",self.base_ang_vel[0,2])
             
@@ -376,30 +377,32 @@ class WheelLeggedEnv:
         #                            envs_idx=envs_idx)
     
     def curriculum_commands(self):
-        if self.curriculum_lin_vel_rew_func().mean()>0.8:
+        mean_lin_vel_rew_func = self.curriculum_lin_vel_rew_func().mean()
+        if mean_lin_vel_rew_func>0.85:
             self.curriculum_lin_vel_scale += self.curriculum_cfg["curriculum_lin_vel_step"] 
-        else:
+        elif mean_lin_vel_rew_func<0.5:
             self.curriculum_lin_vel_scale -= self.curriculum_cfg["curriculum_lin_vel_step"]
         #clip
-        if self.curriculum_lin_vel_scale < self.curriculum_cfg["curriculum_lin_vel_step"]:
-            self.curriculum_lin_vel_scale = self.curriculum_cfg["curriculum_lin_vel_step"]
+        if self.curriculum_lin_vel_scale < self.curriculum_cfg["curriculum_lin_vel_min_range"]:
+            self.curriculum_lin_vel_scale = self.curriculum_cfg["curriculum_lin_vel_min_range"]
         elif self.curriculum_lin_vel_scale > 1:
             self.curriculum_lin_vel_scale = 1
         self.command_cfg["lin_vel_x_range"][0] = self.curriculum_lin_vel_scale * self.basic_command_cfg["lin_vel_x_range"][0]
         self.command_cfg["lin_vel_x_range"][1] = self.curriculum_lin_vel_scale * self.basic_command_cfg["lin_vel_x_range"][1]
         
-        if self.curriculum_ang_vel_rew_func().mean()>0.8:
+        mean_ang_vel_rew_func = self.curriculum_ang_vel_rew_func().mean()
+        if mean_ang_vel_rew_func>0.85:
             self.curriculum_ang_vel_scale += self.curriculum_cfg["curriculum_ang_vel_step"] 
-        else:
+        elif mean_ang_vel_rew_func<0.5:
             self.curriculum_ang_vel_scale -= self.curriculum_cfg["curriculum_ang_vel_step"]
         #clip
-        if self.curriculum_ang_vel_scale < self.curriculum_cfg["curriculum_ang_vel_step"]:
-            self.curriculum_ang_vel_scale = self.curriculum_cfg["curriculum_ang_vel_step"]
+        if self.curriculum_ang_vel_scale < self.curriculum_cfg["curriculum_ang_vel_min_range"]:
+            self.curriculum_ang_vel_scale = self.curriculum_cfg["curriculum_ang_vel_min_range"]
         elif self.curriculum_ang_vel_scale > 1:
             self.curriculum_ang_vel_scale = 1
         self.command_cfg["ang_vel_range"][0] = self.curriculum_lin_vel_scale * self.basic_command_cfg["ang_vel_range"][0]
         self.command_cfg["ang_vel_range"][1] = self.curriculum_lin_vel_scale * self.basic_command_cfg["ang_vel_range"][1]
-    
+        # print(self.curriculum_lin_vel_rew_func().mean())
     
     # ------------ reward functions----------------
     # def _reward_tracking_lin_vel(self):

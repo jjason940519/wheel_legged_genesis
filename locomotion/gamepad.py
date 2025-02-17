@@ -14,7 +14,7 @@ class control_gamepad:
             self.joystick.init()
             print(f"link gamepad: {self.joystick.get_name()}")
         self.num_commands = command_cfg["num_commands"]
-        self.command_ = command_cfg
+        self.command_cfg = command_cfg
         self.commands = np.zeros(self.num_commands)
         self.command_scale = command_scale
         if self.command_scale is None:
