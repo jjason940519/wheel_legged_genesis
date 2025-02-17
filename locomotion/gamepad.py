@@ -12,7 +12,7 @@ class control_gamepad:
             # 选择第一个手柄
             self.joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
-            print(f"link gamepad: {self.joystick.get_name()}")
+            # print(f"link gamepad: {self.joystick.get_name()}")
         self.num_commands = command_cfg["num_commands"]
         self.command_cfg = command_cfg
         self.commands = np.zeros(self.num_commands)

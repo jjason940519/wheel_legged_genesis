@@ -26,14 +26,14 @@ scene = gs.Scene(
 plane = scene.add_entity(
     gs.morphs.Plane(),
 )
-franka = scene.add_entity(
-    # gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
-    # pos=(0.0, 0.0, 0.15)
-    # ),
-    gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
-    pos=(0.0, 0.0, 0.265)
+robot = scene.add_entity(
+    gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
+    pos=(0.0, 0.0, 0.15)
     ),
-    vis_mode='collision'
+    # gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+    # pos=(0.0, 0.0, 0.265)
+    # ),
+    # vis_mode='collision'
 )
 
 cam = scene.add_camera(
@@ -55,17 +55,24 @@ jnt_names = [
     "left_wheel_joint",
     "right_wheel_joint",
 ]
-dofs_idx = [franka.get_joint(name).dof_idx_local for name in jnt_names]
-franka.set_dofs_kp(
+dofs_idx = [robot.get_joint(name).dof_idx_local for name in jnt_names]
+robot.set_dofs_kp(
     kp = np.array([20,20,20,20,40,40]),
     dofs_idx_local = dofs_idx,
 )
-franka.set_dofs_kv(
+robot.set_dofs_kv(
     kv = np.array([0.5,0.5,0.5,0.5,0.5,0.5]),
     dofs_idx_local = dofs_idx,
 )
-left_knee = franka.get_joint("left_calf_joint")
+left_knee = robot.get_joint("left_calf_joint")
 
+print(robot.n_links)
+link = robot.get_link("base_link")
+print(link.idx)
+link = robot.get_link("left_wheel_link")
+print(link.idx)
+link = robot.get_link("right_wheel_link")
+print(link.idx)
 
 # 渲染rgb、深度、分割掩码和法线图
 # rgb, depth, segmentation, normal = cam.render(rgb=True, depth=True, segmentation=True, normal=True)
@@ -74,16 +81,16 @@ left_knee = franka.get_joint("left_calf_joint")
 import numpy as np
 
 while True:
-    franka.control_dofs_position(
-            np.array([0.0, 0.0, 0.0, 0.0, 10.0, 10.0]),
-            dofs_idx,
-        )
-    scene.step()
-    # print(franka.get_pos())
+    # robot.control_dofs_position(
+    #         np.array([0.0, 0.0, 0.0, 0.0, 10.0, 10.0]),
+    #         dofs_idx,
+    #     )
+    # scene.step()
+    # print(robot.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)
-    # force = franka.get_links_net_contact_force()
-    # dof_vel = franka.get_dofs_velocity()
+    # force = robot.get_links_net_contact_force()
+    # dof_vel = robot.get_dofs_velocity()
     # print("dof_vel:",dof_vel)
     # time.sleep(0.1)
     cam.render()

@@ -76,7 +76,7 @@ class WheelLeggedEnv:
         #     pos=self.base_init_pos.cpu().numpy()),
         #     vis_mode='collision'
         # )
-
+        
         # build
         self.scene.build(n_envs=num_envs)
 
@@ -259,6 +259,7 @@ class WheelLeggedEnv:
             self.curriculum_commands()
         else:
             print("base_ang_vel: ",self.base_ang_vel[0,2])
+            print("base_lin_vel: ",self.base_lin_vel[0,:])
             
         # compute observations
         self.slice_obs_buf = torch.cat(
@@ -400,8 +401,8 @@ class WheelLeggedEnv:
             self.curriculum_ang_vel_scale = self.curriculum_cfg["curriculum_ang_vel_min_range"]
         elif self.curriculum_ang_vel_scale > 1:
             self.curriculum_ang_vel_scale = 1
-        self.command_cfg["ang_vel_range"][0] = self.curriculum_lin_vel_scale * self.basic_command_cfg["ang_vel_range"][0]
-        self.command_cfg["ang_vel_range"][1] = self.curriculum_lin_vel_scale * self.basic_command_cfg["ang_vel_range"][1]
+        self.command_cfg["ang_vel_range"][0] = self.curriculum_ang_vel_scale * self.basic_command_cfg["ang_vel_range"][0]
+        self.command_cfg["ang_vel_range"][1] = self.curriculum_ang_vel_scale * self.basic_command_cfg["ang_vel_range"][1]
         # print(self.curriculum_lin_vel_rew_func().mean())
     
     # ------------ reward functions----------------
@@ -485,7 +486,7 @@ class WheelLeggedEnv:
 
     def _reward_dof_force(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square(self.dof_force), dim=1)
+        return torch.sum(torch.square(self.dof_force[:, :4]), dim=1)
 
     def _reward_ang_vel_xy(self):
         # Penalize xy axes base angular velocity
@@ -494,3 +495,13 @@ class WheelLeggedEnv:
     def _reward_collision(self):
         # 接触地面惩罚 力越大惩罚越大
         return torch.square(self.connect_force[:,0,:]).sum(dim=1)
+
+    def _reward_lift_feet(self):
+        # 抬脚惩罚
+        lift_feet = torch.sum(torch.square(self.connect_force[:,5,:]) 
+                              + torch.square(self.connect_force[:,6,:]),dim=1)
+        if lift_feet.mean() > 0:
+            rew = torch.zeros(1, device=self.device, dtype=gs.tc_float)
+        else:
+            rew = torch.ones(1, device=self.device, dtype=gs.tc_float)
+        return rew

@@ -109,8 +109,8 @@ def get_cfgs():
             # "right_hip_joint":23.6,
             "right_thigh_joint": 40.0,
             "right_calf_joint": 40.0,
-            "left_wheel_joint": 12.0,
-            "right_wheel_joint": 12.0,
+            "left_wheel_joint": 40.0,
+            "right_wheel_joint": 40.0,
         },
         # PD
         "kp": 30.0,
@@ -156,20 +156,21 @@ def get_cfgs():
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 0.5,
-            "tracking_base_height": 1.0,
+            "tracking_ang_vel": 1.0,
+            "tracking_base_height": 1.2,
             "lin_vel_z": -0.02, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
             "projected_gravity": 5.0,
-            "similar_legged": 0.5, 
+            "similar_legged": 1.0,
             "dof_vel": -2.5e-7,
             "dof_acc": -1.25e-8,
             "dof_force": -0.0001,
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.05,
             "collision": -1.0,  #base接触地面碰撞力越大越惩罚
+            "lift_feet": -1.0,
         },
     }
     command_cfg = {
@@ -211,7 +212,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()

@@ -391,7 +391,7 @@
       velocity="0" />
   </joint>
   <link
-    name="right_calf_Link">
+    name="right_calf_link">
     <inertial>
       <origin
         xyz="0.136705818715524 -2.87388740852212E-06 -0.00583499155756928"
@@ -412,7 +412,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://nz2/meshes/right_calf_Link.STL" />
+          filename="package://nz2/meshes/right_calf_link.STL" />
       </geometry>
       <material
         name="">
@@ -426,7 +426,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://nz2/meshes/right_calf_Link.STL" />
+          filename="package://nz2/meshes/right_calf_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -439,7 +439,7 @@
     <parent
       link="right_thigh_Link" />
     <child
-      link="right_calf_Link" />
+      link="right_calf_link" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -449,7 +449,7 @@
       velocity="0" />
   </joint>
   <link
-    name="right_wheel_Link">
+    name="right_wheel_link">
     <inertial>
       <origin
         xyz="-2.93209900803504E-13 3.30142024829172E-11 -0.0134999704617797"
@@ -470,7 +470,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://nz2/meshes/right_wheel_Link.STL" />
+          filename="package://nz2/meshes/right_wheel_link.STL" />
       </geometry>
       <material
         name="">
@@ -484,7 +484,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://nz2/meshes/right_wheel_Link.STL" />
+          filename="package://nz2/meshes/right_wheel_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -495,9 +495,9 @@
       xyz="0.216 0 -0.027"
       rpy="0 0 -1.8326" />
     <parent
-      link="right_calf_Link" />
+      link="right_calf_link" />
     <child
-      link="right_wheel_Link" />
+      link="right_wheel_link" />
     <axis
       xyz="0 0 1" />
     <limit

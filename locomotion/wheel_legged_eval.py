@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--ckpt", type=int, default=1000)
     args = parser.parse_args()
 
-    gs.init(backend=gs.vulkan)
+    gs.init(backend=gs.gpu)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
@@ -38,7 +38,7 @@ def main():
 
     obs, _ = env.reset()
     env.eval()  #测试模式
-    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14])
+    pad = gamepad.control_gamepad(command_cfg,[3.0,1.0,1.0])
     with torch.no_grad():
         while True:
             actions = policy(obs)
