@@ -116,7 +116,7 @@ def get_cfgs():
         "kp": 30.0,
         "kd": 1.2,
         # termination 角度制    obs的angv弧度制
-        "termination_if_roll_greater_than": 10,  # degree
+        "termination_if_roll_greater_than": 20,  # degree
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
         # "termination_if_base_height_greater_than": 0.1,
         # "termination_if_knee_height_greater_than": 0.00,
@@ -138,7 +138,7 @@ def get_cfgs():
         "history_length": 2,
         "obs_scales": {
             "lin_vel": 2.0,
-            "ang_vel": 0.25,
+            "ang_vel": 0.5,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
             "dof_acc": 0.0025,
@@ -156,7 +156,7 @@ def get_cfgs():
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 0.5,
+            "tracking_ang_vel": 1.0,
             "tracking_base_height": 1.2,
             "lin_vel_z": -0.02, #大了影响高度变换速度
             "joint_action_rate": -0.005,
@@ -165,16 +165,17 @@ def get_cfgs():
             "projected_gravity": 5.0,
             "similar_legged": 0.5,
             "dof_vel": -2.5e-7,
-            "dof_acc": -1.25e-8,
-            "dof_force": -0.0001,
+            "dof_acc": -1.25e-9,
+            "dof_force": -0.0006,
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
-            "ang_vel_xy": -0.05,
-            "collision": -1.0,  #base接触地面碰撞力越大越惩罚
+            "ang_vel_xy": -0.005,
+            "collision": -0.01,  #base接触地面碰撞力越大越惩罚
             # "lift_feet": -1.0, 
         },
     }
     command_cfg = {
         "num_commands": 4,
+        "base_range": 0.3,
         "lin_vel_x_range": [-3.0, 3.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-6.28, 6.28],   #修改范围要调整奖励权重
@@ -212,7 +213,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.cuda)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()

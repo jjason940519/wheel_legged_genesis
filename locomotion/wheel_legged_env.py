@@ -7,6 +7,7 @@ import copy
 
 def gs_rand_float(lower, upper, shape, device):
     return (upper - lower) * torch.rand(size=shape, device=device) + lower
+
     
 class WheelLeggedEnv:
     def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, show_viewer=False, device="cuda"):
@@ -31,8 +32,7 @@ class WheelLeggedEnv:
         self.env_cfg = env_cfg
         self.obs_cfg = obs_cfg
         self.reward_cfg = reward_cfg
-        self.command_cfg = command_cfg
-        self.basic_command_cfg = copy.deepcopy(command_cfg)      
+        self.command_cfg = command_cfg  
 
         self.obs_scales = obs_cfg["obs_scales"]
         self.reward_scales = reward_cfg["reward_scales"]
@@ -108,22 +108,19 @@ class WheelLeggedEnv:
             self.episode_sums[name] = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
 
         # prepare curriculum reward functions and multiply reward scales by dt
-        self.curriculum_reward_functions = dict()
-        for name in self.curriculum_cfg["curriculum_reward"]:
-            self.curriculum_reward_functions[name] = getattr(self, "_reward_" + name)
-        self.curriculum_value = torch.zeros(1, device=self.device, dtype=gs.tc_float)
-        self.curriculum1 = 0.8 * (self.reward_scales["projected_gravity"] + self.reward_scales["tracking_base_height"] + self.reward_scales["similar_legged"])
-        self.curriculum_lin_vel_rew_func = getattr(self, "_reward_tracking_lin_vel")
-        self.curriculum_ang_vel_rew_func = getattr(self, "_reward_tracking_ang_vel")
-        self.curriculum_lin_vel_scale = self.curriculum_cfg["curriculum_lin_vel_step"]
-        self.curriculum_ang_vel_scale = self.curriculum_cfg["curriculum_ang_vel_step"]
-        self.command_cfg["lin_vel_x_range"][0] = self.curriculum_cfg["curriculum_lin_vel_min_range"] * self.basic_command_cfg["lin_vel_x_range"][0]
-        self.command_cfg["lin_vel_x_range"][1] = self.curriculum_cfg["curriculum_lin_vel_min_range"] * self.basic_command_cfg["lin_vel_x_range"][1]
-        self.command_cfg["ang_vel_range"][0] = self.curriculum_cfg["curriculum_ang_vel_min_range"] * self.basic_command_cfg["ang_vel_range"][0]
-        self.command_cfg["ang_vel_range"][1] = self.curriculum_cfg["curriculum_ang_vel_min_range"] * self.basic_command_cfg["ang_vel_range"][1]
-        
-        self.lin_vel_error = torch.zeros(1, device=self.device, dtype=gs.tc_float)
-        self.ang_vel_error = torch.zeros(1, device=self.device, dtype=gs.tc_float)
+        self.command_ranges = torch.zeros((self.num_envs, self.num_commands,2),device=self.device,dtype=gs.tc_float)
+        self.command_ranges[:,0,0] = self.command_cfg["lin_vel_x_range"][0] * self.command_cfg["base_range"]
+        self.command_ranges[:,0,1] = self.command_cfg["lin_vel_x_range"][1] * self.command_cfg["base_range"]
+        self.command_ranges[:,1,0] = self.command_cfg["lin_vel_y_range"][0] * self.command_cfg["base_range"]
+        self.command_ranges[:,1,1] = self.command_cfg["lin_vel_y_range"][1] * self.command_cfg["base_range"]
+        self.command_ranges[:,2,0] = self.command_cfg["ang_vel_range"][0] * self.command_cfg["base_range"]
+        self.command_ranges[:,2,1] = self.command_cfg["ang_vel_range"][1] * self.command_cfg["base_range"]
+        self.command_ranges[:,3,0] = self.command_cfg["height_target_range"][0]
+        self.command_ranges[:,3,1] = self.command_cfg["height_target_range"][1]
+        self.lin_vel_error = torch.zeros((self.num_envs,1), device=self.device, dtype=gs.tc_float)
+        self.ang_vel_error = torch.zeros((self.num_envs,1), device=self.device, dtype=gs.tc_float)
+        self.curriculum_lin_vel_scale = torch.zeros((self.num_envs,1), device=self.device, dtype=gs.tc_float)
+        self.curriculum_ang_vel_scale = torch.zeros((self.num_envs,1), device=self.device, dtype=gs.tc_float)
 
         # initialize buffers
         self.base_lin_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
@@ -149,7 +146,7 @@ class WheelLeggedEnv:
             device=self.device,
             dtype=gs.tc_float,
         )
-        self.command_ranges = torch.zeros((self.num_envs,3),device=self.device,dtype=gs.tc_float)
+        
         self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float)
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
@@ -180,13 +177,11 @@ class WheelLeggedEnv:
         print("self.obs_buf.size(): ",self.obs_buf.size())
 
     def _resample_commands(self, envs_idx):
-        if(self.curriculum_value > self.curriculum1):
-            self.commands[envs_idx, 0] = gs_rand_float(*self.command_cfg["lin_vel_x_range"], (len(envs_idx),), self.device)
-            self.commands[envs_idx, 1] = gs_rand_float(*self.command_cfg["lin_vel_y_range"], (len(envs_idx),), self.device)
-            self.commands[envs_idx, 2] = gs_rand_float(*self.command_cfg["ang_vel_range"], (len(envs_idx),), self.device)
-        else:
-            self.commands[envs_idx] = torch.zeros(self.num_commands, device=self.device, dtype=gs.tc_float)
-        self.commands[envs_idx, 3] = gs_rand_float(*self.command_cfg["height_target_range"], (len(envs_idx),), self.device)
+        for idx in envs_idx:
+            for command_idx in range(self.num_commands):
+                low = self.command_ranges[idx, command_idx, 0]
+                high = self.command_ranges[idx, command_idx, 1]
+                self.commands[idx, command_idx] = gs_rand_float(low, high, (1,), self.device)
 
     def set_commands(self,envs_idx,commands):
         self.commands[envs_idx]=torch.tensor(commands,device=self.device, dtype=gs.tc_float)
@@ -255,15 +250,9 @@ class WheelLeggedEnv:
             self.episode_sums[name] += rew
             
         # compute curriculum reward
-        self.curriculum_rew_buf[:] = 0.0
-        for name, reward_func in self.curriculum_reward_functions.items():
-            rew = reward_func() * self.reward_scales[name]
-            self.curriculum_rew_buf += rew
-        self.curriculum_value = self.curriculum_rew_buf.mean()
-        
-        self.lin_vel_error += torch.abs(self.commands[:, :2] - self.base_lin_vel[:, :2]).mean()
-        self.ang_vel_error = torch.abs(self.commands[:, 2] - self.base_ang_vel[:, 2]).mean()
-        
+        self.lin_vel_error += torch.abs(self.commands[:, :2] - self.base_lin_vel[:, :2]).mean(dim=1, keepdim=True)
+        self.ang_vel_error += torch.abs(self.commands[:, 2] - self.base_ang_vel[:, 2]).mean()
+
         if(self.mode):
             self._resample_commands(envs_idx)
             # self.curriculum_commands()
@@ -387,37 +376,50 @@ class WheelLeggedEnv:
         #                            dofs_idx_local=np.arange(0, self.robot.n_dofs), 
         #                            envs_idx=envs_idx)
 
-    def curriculum_commands(self,num):
-        self.lin_vel_error/=num
-        self.ang_vel_error/=num
-        #15%-30%  误差调控 24轮调控一次
-        if self.lin_vel_error < 0.15:
-            self.curriculum_lin_vel_scale += self.curriculum_cfg["curriculum_lin_vel_step"] 
-        elif self.lin_vel_error > 0.20:
-            self.curriculum_lin_vel_scale -= self.curriculum_cfg["curriculum_lin_vel_step"]
-        #clip
-        if self.curriculum_lin_vel_scale < self.curriculum_cfg["curriculum_lin_vel_min_range"]:
-            self.curriculum_lin_vel_scale = self.curriculum_cfg["curriculum_lin_vel_min_range"]
-        elif self.curriculum_lin_vel_scale > 1:
-            self.curriculum_lin_vel_scale = 1
-        self.command_cfg["lin_vel_x_range"][0] = self.curriculum_lin_vel_scale * self.basic_command_cfg["lin_vel_x_range"][0]
-        self.command_cfg["lin_vel_x_range"][1] = self.curriculum_lin_vel_scale * self.basic_command_cfg["lin_vel_x_range"][1]
+    def adjust_scale(self, error,lower_err,upper_err, scale, scale_step, min_range, range_cfg):
+        # 计算误差范围
+        min_condition = error < lower_err
+        max_condition = error > upper_err
+        # 调整 scale
+        scale[min_condition] += scale_step
+        scale[max_condition] -= scale_step
+        scale.clip_(min_range, 1)
+        # 更新 command_ranges
+        range_min, range_max = range_cfg
+        return scale * range_min, scale * range_max
 
-        if self.ang_vel_error < 0.15:
-            self.curriculum_ang_vel_scale += self.curriculum_cfg["curriculum_ang_vel_step"] 
-        elif self.ang_vel_error > 0.20:
-            self.curriculum_ang_vel_scale -= self.curriculum_cfg["curriculum_ang_vel_step"]
-        #clip
-        if self.curriculum_ang_vel_scale < self.curriculum_cfg["curriculum_ang_vel_min_range"]:
-            self.curriculum_ang_vel_scale = self.curriculum_cfg["curriculum_ang_vel_min_range"]
-        elif self.curriculum_ang_vel_scale > 1:
-            self.curriculum_ang_vel_scale = 1
-        self.command_cfg["ang_vel_range"][0] = self.curriculum_ang_vel_scale * self.basic_command_cfg["ang_vel_range"][0]
-        self.command_cfg["ang_vel_range"][1] = self.curriculum_ang_vel_scale * self.basic_command_cfg["ang_vel_range"][1]
-        
-        self.lin_vel_error = torch.zeros(1, device=self.device, dtype=gs.tc_float)
-        self.ang_vel_error = torch.zeros(1, device=self.device, dtype=gs.tc_float)
-        print("curriculum_commands")
+    def curriculum_commands(self, num):
+        # 更新误差
+        self.lin_vel_error /= num
+        self.ang_vel_error /= num
+        # 调整线速度
+        lin_min_range, lin_max_range = self.adjust_scale(
+            self.lin_vel_error, 
+            0.05,
+            0.1,
+            self.curriculum_lin_vel_scale, 
+            self.curriculum_cfg["curriculum_lin_vel_step"], 
+            self.curriculum_cfg["curriculum_lin_vel_min_range"], 
+            self.command_cfg["lin_vel_x_range"]
+        )
+        self.command_ranges[:, 0, 0] = lin_min_range.squeeze()
+        self.command_ranges[:, 0, 1] = lin_max_range.squeeze()
+        # 调整角速度
+        ang_min_range, ang_max_range = self.adjust_scale(
+            self.ang_vel_error, 
+            0.15,
+            0.20,
+            self.curriculum_ang_vel_scale, 
+            self.curriculum_cfg["curriculum_ang_vel_step"], 
+            self.curriculum_cfg["curriculum_ang_vel_min_range"], 
+            self.command_cfg["ang_vel_range"]
+        )
+        self.command_ranges[:, 2, 0] = ang_min_range.squeeze()
+        self.command_ranges[:, 2, 1] = ang_max_range.squeeze()
+        # 重置误差
+        self.lin_vel_error = torch.zeros((self.num_envs, 1), device=self.device, dtype=gs.tc_float)
+        self.ang_vel_error = torch.zeros((self.num_envs, 1), device=self.device, dtype=gs.tc_float)
+
 
     # ------------ reward functions----------------
     # def _reward_tracking_lin_vel(self):
@@ -429,10 +431,8 @@ class WheelLeggedEnv:
 
     def _reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
-        if(self.curriculum_value > self.curriculum1):
-            lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
-            return torch.exp(-lin_vel_error / self.reward_cfg["tracking_lin_sigma"])+0.5*torch.exp(-lin_vel_error / self.reward_cfg["tracking_lin_sigma2"])
-        return torch.zeros(1, device=self.device, dtype=gs.tc_float)
+        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
+        return torch.exp(-lin_vel_error / self.reward_cfg["tracking_lin_sigma"])
     
     # def _reward_tracking_ang_vel(self):
     #     # Tracking of angular velocity commands (yaw)
@@ -443,10 +443,8 @@ class WheelLeggedEnv:
 
     def _reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
-        if(self.curriculum_value > self.curriculum1):
-            ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-            return torch.exp(-ang_vel_error / self.reward_cfg["tracking_ang_sigma"]) + 0.5*torch.exp(-ang_vel_error / self.reward_cfg["tracking_ang_sigma2"])
-        return torch.zeros(1, device=self.device, dtype=gs.tc_float)
+        ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+        return torch.exp(-ang_vel_error / self.reward_cfg["tracking_ang_sigma"])
 
     def _reward_tracking_base_height(self):
         # Penalize base height away from target

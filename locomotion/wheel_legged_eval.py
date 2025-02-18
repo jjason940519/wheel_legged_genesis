@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--ckpt", type=int, default=1000)
     args = parser.parse_args()
 
-    gs.init(backend=gs.vulkan)
+    gs.init(backend=gs.cuda)
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
@@ -30,15 +30,15 @@ def main():
         domain_rand_cfg=domain_rand_cfg,
         show_viewer=True,
     )
-
+    print(reward_cfg)
     runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
     resume_path = os.path.join(log_dir, f"model_{args.ckpt}.pt")
     runner.load(resume_path)
     policy = runner.get_inference_policy(device="cuda:0")
 
     obs, _ = env.reset()
-    # env.eval()  #测试模式
-    pad = gamepad.control_gamepad(command_cfg,[3.0,1.0,1.0])
+    env.eval()  #测试模式
+    pad = gamepad.control_gamepad(command_cfg,[2.4,1.0,1.0])
     with torch.no_grad():
         while True:
             actions = policy(obs)
