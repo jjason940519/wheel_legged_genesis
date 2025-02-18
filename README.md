@@ -61,6 +61,11 @@ When using AMD GPUs, it is recommended to select vulkan for the genesis backend
 [25赛季平衡底盘仿真](https://www.bilibili.com/video/BV1DUNHe7EjP/?share_source=copy_web>)  
 [别平步了，要不双足吧](https://www.bilibili.com/video/BV1oSN8eUEXw/?share_source=copy_web>)   
 [这是平步模式了](https://www.bilibili.com/video/BV1YoNDevENT/?share_source=copy_web>)    
-[【开源】genesis双轮足机器人强化学习（基础版）](https://www.bilibili.com/video/BV14eKKeiEJB/?share_source=copy_web)  
+[【开源】genesis双轮足机器人强化学习（基础版）](https://www.bilibili.com/video/BV14eKKeiEJB/?share_source=copy_web) 
+## TODO:
+**terrain：**   
+Rough roads, uphill and downhill slopes, and stairs
+**more dof:**
+left_hip and right_hip
 技术交流：  
 ![微信图片_20250214171412_3](https://github.com/user-attachments/assets/958ad5c0-b76e-4446-ba15-1bb4d1ac0383)  
