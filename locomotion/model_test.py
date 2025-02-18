@@ -23,9 +23,33 @@ scene = gs.Scene(
     renderer=gs.renderers.Rasterizer(),
 )
 
-plane = scene.add_entity(
-    gs.morphs.Plane(),
-)
+# plane = scene.add_entity(
+#     gs.morphs.Plane(),
+# )
+
+#高度字段行是是一个二维数组 一维数组数据为x轴数据 单位
+height_field = np.array([
+                         [0, 0, 0,0,0],
+                         [0, 0, 0,0,0],
+                         [0, 0, 0,0,0],
+                         [0, 0, 0,0,0], 
+                         [200, 200, 200,200,200], 
+                         [200, 200, 200,200,200],
+                         [200, 200, 200,200,200],
+                         [20, 20, 20,20,20],
+                         [12, 5, 13,34,54],
+                         [42, 40, 26,35,55],
+                         [15, 50, 21,36,56],
+                         [2, 30, 41,37,57],])
+terrain = scene.add_entity(
+        morph=gs.morphs.Terrain(
+        pos = (0.5,0.5,0.0),
+        height_field = height_field,
+        horizontal_scale=0.01,  #水平缩放 (m)
+        vertical_scale=0.001,   #垂直缩放 (m)
+        ),
+    )
+
 robot = scene.add_entity(
     gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
     pos=(0.0, 0.0, 0.15)
