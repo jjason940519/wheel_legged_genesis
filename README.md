@@ -46,6 +46,13 @@ test:
 train:  
 `python locomotion/wheel_legged_train.py`  
 
+### gamepad  
+|key|function|
+|---|--------|
+|LY|lin_vel|
+|RX|ang_vel|
+|LT|height_up|
+|RT|height_down| 
 ## Suggestion
 When using NVIDIA GPUs, it is recommended that the genesis backend choose gpu or cuda    
 When using AMD GPUs, it is recommended to select vulkan for the genesis backend  
