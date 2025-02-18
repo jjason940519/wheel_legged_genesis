@@ -214,7 +214,7 @@ def main():
     args = parser.parse_args()
 
     gs.init(logging_level="warning",backend=gs.cuda)
-
+    gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()
     train_cfg = get_train_cfg(args.exp_name, args.max_iterations)

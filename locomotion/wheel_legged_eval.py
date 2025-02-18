@@ -12,11 +12,11 @@ import gamepad
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=1000)
+    parser.add_argument("--ckpt", type=int, default=5000)
     args = parser.parse_args()
 
-    gs.init(backend=gs.cuda)
-
+    gs.init(backend=gs.vulkan)
+    gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
     # reward_cfg["reward_scales"] = {} #why？

@@ -352,17 +352,17 @@ class WheelLeggedEnv:
     def domain_rand(self, envs_idx):
         friction_ratio = self.friction_ratio_low + self.friction_ratio_range * torch.rand(len(envs_idx), self.robot.n_links)
         self.robot.set_friction_ratio(friction_ratio=friction_ratio,
-                                      link_indices=np.arange(0, self.robot.n_links),
+                                      ls_idx_local=np.arange(0, self.robot.n_links),
                                       envs_idx = envs_idx)
         
         mass_shift = -self.domain_rand_cfg["random_mass_shift"]/2 + self.domain_rand_cfg["random_mass_shift"]*torch.rand(len(envs_idx), self.robot.n_links)
         self.robot.set_mass_shift(mass_shift=mass_shift,
-                                  link_indices=np.arange(0, self.robot.n_links),
+                                  ls_idx_local=np.arange(0, self.robot.n_links),
                                   envs_idx = envs_idx)
         
         com_shift = -self.domain_rand_cfg["random_com_shift"]/2+self.domain_rand_cfg["random_com_shift"]*torch.rand(len(envs_idx), self.robot.n_links, 3)
         self.robot.set_COM_shift(com_shift=com_shift,
-                                 link_indices=np.arange(0, self.robot.n_links),
+                                 ls_idx_local=np.arange(0, self.robot.n_links),
                                  envs_idx = envs_idx)
 
         # genesis bug

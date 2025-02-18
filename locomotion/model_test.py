@@ -1,6 +1,7 @@
 import genesis as gs
 import numpy as np
 import time
+import cv2
 gs.init(backend=gs.vulkan)
 
 scene = gs.Scene(
@@ -23,30 +24,33 @@ scene = gs.Scene(
     renderer=gs.renderers.Rasterizer(),
 )
 
-# plane = scene.add_entity(
-#     gs.morphs.Plane(),
-# )
+plane = scene.add_entity(
+    gs.morphs.Plane(),
+)
+
 
 #高度字段行是是一个二维数组 一维数组数据为x轴数据 单位
-height_field = np.array([
-                         [0, 0, 0,0,0],
-                         [0, 0, 0,0,0],
-                         [0, 0, 0,0,0],
-                         [0, 0, 0,0,0], 
-                         [200, 200, 200,200,200], 
-                         [200, 200, 200,200,200],
-                         [200, 200, 200,200,200],
-                         [20, 20, 20,20,20],
-                         [12, 5, 13,34,54],
-                         [42, 40, 26,35,55],
-                         [15, 50, 21,36,56],
-                         [2, 30, 41,37,57],])
+# height_field = np.array([
+#                          [0, 0, 0,0,0],
+#                          [0, 0, 0,0,0],
+#                          [0, 0, 0,0,0],
+#                          [0, 0, 0,0,0], 
+#                          [200, 200, 200,200,200], 
+#                          [200, 200, 200,200,200],
+#                          [200, 200, 200,200,200],
+#                          [20, 20, 20,20,20],
+#                          [12, 5, 13,34,54],
+#                          [42, 40, 26,35,55],
+#                          [15, 50, 21,36,56],
+#                          [2, 30, 41,37,57],])
+height_field = cv2.imread("/home/albusgive/wheel_legged_genesis/assets/terrain/png/jilin.png", cv2.IMREAD_GRAYSCALE)
+height_field = cv2.resize(height_field,(125,100))   #建议100*100或者150*150
 terrain = scene.add_entity(
         morph=gs.morphs.Terrain(
         pos = (0.5,0.5,0.0),
         height_field = height_field,
-        horizontal_scale=0.01,  #水平缩放 (m)
-        vertical_scale=0.001,   #垂直缩放 (m)
+        horizontal_scale=0.1,  #水平缩放 (m) 建议0.1
+        vertical_scale=0.005,   #垂直缩放 (m)
         ),
     )
 
@@ -109,7 +113,7 @@ while True:
     #         np.array([0.0, 0.0, 0.0, 0.0, 10.0, 10.0]),
     #         dofs_idx,
     #     )
-    # scene.step()
+    scene.step()
     # print(robot.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)
