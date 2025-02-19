@@ -11,10 +11,10 @@ def gs_rand_float(lower, upper, shape, device):
     
 class WheelLeggedEnv:
     def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, 
-                 domain_rand_cfg, terrain_cfg, show_viewer=False, device="cuda"):
+                 domain_rand_cfg, terrain_cfg, show_viewer=False, device="cuda", train_mode=True):
         self.device = torch.device(device)
 
-        self.mode = True   #True训练模式开启
+        self.mode = train_mode   #True训练模式开启
         
         self.num_envs = num_envs
         self.num_obs = obs_cfg["num_obs"]
@@ -80,7 +80,7 @@ class WheelLeggedEnv:
         #     pos=self.base_init_pos.cpu().numpy()),
         #     vis_mode='collision'
         # )
-        
+
         height_field = cv2.imread("assets/terrain/png/agent_eval_gym.png", cv2.IMREAD_GRAYSCALE)
         self.terrain = self.scene.add_entity(
         morph=gs.morphs.Terrain(
@@ -215,9 +215,6 @@ class WheelLeggedEnv:
 
     def set_commands(self,envs_idx,commands):
         self.commands[envs_idx]=torch.tensor(commands,device=self.device, dtype=gs.tc_float)
-
-    def eval(self):
-        self.mode = False
         
     def step(self, actions):
         self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])

@@ -30,6 +30,7 @@ def main():
         domain_rand_cfg=domain_rand_cfg,
         terrain_cfg=terrain_cfg,
         show_viewer=True,
+        train_mode=False
     )
     print(reward_cfg)
     runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
@@ -38,7 +39,6 @@ def main():
     policy = runner.get_inference_policy(device="cuda:0")
 
     obs, _ = env.reset()
-    env.eval()  #测试模式
     pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14])
     with torch.no_grad():
         while True:
