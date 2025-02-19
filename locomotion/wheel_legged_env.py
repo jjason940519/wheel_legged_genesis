@@ -81,6 +81,15 @@ class WheelLeggedEnv:
         #     vis_mode='collision'
         # )
         
+        height_field = cv2.imread("assets/terrain/png/agent_eval_gym.png", cv2.IMREAD_GRAYSCALE)
+        self.terrain = self.scene.add_entity(
+        morph=gs.morphs.Terrain(
+        pos = (1.0,1.0,0.0),
+        height_field = height_field,
+        horizontal_scale=0.1, 
+        vertical_scale=0.001,
+        ),)
+        
         # add terrain 只能有一个Terrain(genesis v0.2.0)
         self.horizontal_scale = self.terrain_cfg["horizontal_scale"]
         self.vertical_scale = self.terrain_cfg["vertical_scale"]
