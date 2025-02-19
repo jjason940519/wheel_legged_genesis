@@ -203,7 +203,7 @@ def get_cfgs():
     }
     #地形配置
     terrain_cfg = {
-        "terrain":True,
+        "terrain":False, #是否开启地形
         "num_respawn_points":3,
         "respawn_points":[
             [-10.0, -10.0, 0.0],    #plane地形坐标，一定要有，为了远离其他地形
@@ -224,7 +224,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.cuda)
+    gs.init(logging_level="warning",backend=gs.gpu)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()

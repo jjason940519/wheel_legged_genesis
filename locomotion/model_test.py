@@ -4,7 +4,7 @@ import time
 import cv2
 import math
 import torch
-gs.init(backend=gs.gpu)
+gs.init(backend=gs.vulkan)
 
 scene = gs.Scene(
     show_viewer = True,

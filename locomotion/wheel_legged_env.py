@@ -433,7 +433,7 @@ class WheelLeggedEnv:
         ang_min_range, ang_max_range = self.adjust_scale(
             self.ang_vel_error, 
             0.15,
-            0.20,
+            0.25,
             self.curriculum_ang_vel_scale, 
             self.curriculum_cfg["curriculum_ang_vel_step"], 
             self.curriculum_cfg["curriculum_ang_vel_min_range"], 
@@ -504,7 +504,7 @@ class WheelLeggedEnv:
         # Tracking of linear velocity commands (xy axes)
         lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
         return torch.exp(-lin_vel_error / self.reward_cfg["tracking_lin_sigma"])
-    
+
     # def _reward_tracking_ang_vel(self):
     #     # Tracking of angular velocity commands (yaw)
     #     if(self.curriculum_value > self.curriculum1):
@@ -521,7 +521,7 @@ class WheelLeggedEnv:
         # Penalize base height away from target
         base_height_error = torch.square(self.base_pos[:, 2] - self.commands[:, 3])
         return torch.exp(-base_height_error / self.reward_cfg["tracking_height_sigma"])
-    
+
     def _reward_lin_vel_z(self):
         # Penalize z axis base linear velocity
         return torch.square(self.base_lin_vel[:, 2])
