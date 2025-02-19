@@ -148,9 +148,7 @@ def get_cfgs():
     # 名字和奖励函数名一一对应
     reward_cfg = {
         "tracking_lin_sigma": 0.25, 
-        "tracking_lin_sigma2": 0.001, 
         "tracking_ang_sigma": 0.25, 
-        "tracking_ang_sigma2": 0.001, 
         "tracking_height_sigma": 0.0015,
         "tracking_similar_legged_sigma": 0.5,
         "tracking_gravity_sigma": 0.01,
@@ -176,9 +174,9 @@ def get_cfgs():
     command_cfg = {
         "num_commands": 4,
         "base_range": 0.3,
-        "lin_vel_x_range": [-3.0, 3.0], #修改范围要调整奖励权重
+        "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-6.28, 6.28],   #修改范围要调整奖励权重
+        "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
         "height_target_range": [0.22 , 0.32],
     }
     # 课程学习，奖励循序渐进 待优化
@@ -203,7 +201,20 @@ def get_cfgs():
         "dof_damping_range":[0.0 , 0.0], # genesis bug
         "dof_stiffness_range":[0.0 , 0.0], # genesis bug
     }
-    return env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg
+    #地形配置
+    terrain_cfg = {
+        "terrain":True,
+        "num_respawn_points":3,
+        "respawn_points":[
+            [-10.0, -10.0, 0.0],    #plane地形坐标，一定要有，为了远离其他地形
+            [5.0, 5.0, 0.0],
+            [15.0, 5.0, 0.08],
+        ],
+        "horizontal_scale":0.1,
+        "vertical_scale":0.001,
+        "test_terrain":"",
+    }
+    return env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg
 
 
 def main():
@@ -216,7 +227,7 @@ def main():
     gs.init(logging_level="warning",backend=gs.cuda)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg = get_cfgs()
+    env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()
     train_cfg = get_train_cfg(args.exp_name, args.max_iterations)
 
     if os.path.exists(log_dir):
@@ -225,13 +236,14 @@ def main():
 
     env = WheelLeggedEnv(
         num_envs=args.num_envs, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, 
-        command_cfg=command_cfg, curriculum_cfg=curriculum_cfg, domain_rand_cfg=domain_rand_cfg
+        command_cfg=command_cfg, curriculum_cfg=curriculum_cfg, 
+        domain_rand_cfg=domain_rand_cfg, terrain_cfg=terrain_cfg
     )
 
     runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
 
     pickle.dump(
-        [env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, train_cfg],
+        [env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg, train_cfg],
         open(f"{log_dir}/cfgs.pkl", "wb"),
     )
 

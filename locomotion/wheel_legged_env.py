@@ -3,14 +3,15 @@ import math
 import genesis as gs
 from genesis.utils.geom import quat_to_xyz, transform_by_quat, inv_quat, transform_quat_by_quat
 import numpy as np
-import copy
+import cv2
 
 def gs_rand_float(lower, upper, shape, device):
     return (upper - lower) * torch.rand(size=shape, device=device) + lower
 
     
 class WheelLeggedEnv:
-    def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, show_viewer=False, device="cuda"):
+    def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, 
+                 domain_rand_cfg, terrain_cfg, show_viewer=False, device="cuda"):
         self.device = torch.device(device)
 
         self.mode = True   #True训练模式开启
@@ -24,6 +25,9 @@ class WheelLeggedEnv:
         self.num_commands = command_cfg["num_commands"]
         self.curriculum_cfg = curriculum_cfg
         self.domain_rand_cfg = domain_rand_cfg
+        self.terrain_cfg = terrain_cfg
+        self.num_respawn_points = self.terrain_cfg["num_respawn_points"]
+        self.respawn_points = self.terrain_cfg["respawn_points"]
 
         self.simulate_action_latency = True  # there is a 1 step latency on real robot
         self.dt = 0.01  # control frequency on real robot is 100hz
@@ -77,6 +81,23 @@ class WheelLeggedEnv:
         #     vis_mode='collision'
         # )
         
+        # add terrain 只能有一个Terrain(genesis v0.2.0)
+        self.horizontal_scale = self.terrain_cfg["horizontal_scale"]
+        self.vertical_scale = self.terrain_cfg["vertical_scale"]
+        self.height_field = cv2.imread("assets/terrain/png/agent_train_gym.png", cv2.IMREAD_GRAYSCALE)
+        self.terrain_height = torch.tensor(self.height_field, device=self.device) * self.vertical_scale
+        if self.terrain_cfg["terrain"]:
+            self.terrain = self.scene.add_entity(
+            morph=gs.morphs.Terrain(
+            height_field = self.height_field,
+            horizontal_scale=self.horizontal_scale, 
+            vertical_scale=self.vertical_scale,
+            ),)
+            
+            self.base_terrain_pos = torch.zeros((self.num_respawn_points, 3), device=self.device)
+            for i in range(self.num_respawn_points):
+                self.base_terrain_pos[i] = self.base_init_pos + torch.tensor(self.respawn_points[i], device=self.device)
+            print("self.base_terrain_pos ",self.base_terrain_pos.size())
         # build
         self.scene.build(n_envs=num_envs)
 
@@ -202,7 +223,7 @@ class WheelLeggedEnv:
         self.scene.step()
         # update buffers
         self.episode_length_buf += 1
-        self.base_pos[:] = self.robot.get_pos()
+        self.base_pos[:] = self.get_relative_terrain_pos(self.robot.get_pos())
         self.base_quat[:] = self.robot.get_quat()
         self.base_euler = quat_to_xyz(
             transform_quat_by_quat(torch.ones_like(self.base_quat) * self.inv_base_init_quat, self.base_quat)
@@ -243,11 +264,12 @@ class WheelLeggedEnv:
         self.reset_idx(self.reset_buf.nonzero(as_tuple=False).flatten())
 
         # compute reward
-        self.rew_buf[:] = 0.0
-        for name, reward_func in self.reward_functions.items():
-            rew = reward_func() * self.reward_scales[name]
-            self.rew_buf += rew
-            self.episode_sums[name] += rew
+        if(self.mode):
+            self.rew_buf[:] = 0.0
+            for name, reward_func in self.reward_functions.items():
+                rew = reward_func() * self.reward_scales[name]
+                self.rew_buf += rew
+                self.episode_sums[name] += rew
             
         # compute curriculum reward
         self.lin_vel_error += torch.abs(self.commands[:, :2] - self.base_lin_vel[:, :2]).mean(dim=1, keepdim=True)
@@ -306,8 +328,11 @@ class WheelLeggedEnv:
         )
 
         # reset base
-        self.base_pos[envs_idx] = self.base_init_pos
         self.base_quat[envs_idx] = self.base_init_quat.reshape(1, -1)
+        if self.terrain_cfg["terrain"]:
+            self.base_pos[envs_idx] = self.base_terrain_pos[0] #TODO 如何判断在什么地形复活
+        else:
+            self.base_pos[envs_idx] = self.base_init_pos   #没开地形就基础
         self.robot.set_pos(self.base_pos[envs_idx], zero_velocity=False, envs_idx=envs_idx)
         self.robot.set_quat(self.base_quat[envs_idx], zero_velocity=False, envs_idx=envs_idx)
         self.base_lin_vel[envs_idx] = 0
@@ -419,6 +444,52 @@ class WheelLeggedEnv:
         # 重置误差
         self.lin_vel_error = torch.zeros((self.num_envs, 1), device=self.device, dtype=gs.tc_float)
         self.ang_vel_error = torch.zeros((self.num_envs, 1), device=self.device, dtype=gs.tc_float)
+
+    def get_relative_terrain_pos(self, base_pos):
+        if not self.terrain_cfg["terrain"]:
+            return base_pos
+        """
+        对多个 (x, y) 坐标进行双线性插值计算地形高度
+        """
+        # 提取x和y坐标
+        x = base_pos[:, 0]
+        y = base_pos[:, 1]
+
+        # 转换为浮点数索引
+        fx = x / self.horizontal_scale
+        fy = y / self.horizontal_scale
+
+        # 获取四个最近的整数网格点，确保在有效范围内
+        x0 = torch.floor(fx).int()
+        x1 = torch.min(x0 + 1, torch.full_like(x0, self.terrain_height.shape[1] - 1))
+        y0 = torch.floor(fy).int()
+        y1 = torch.min(y0 + 1, torch.full_like(y0, self.terrain_height.shape[0] - 1))
+
+        # 确保x0, x1, y0, y1在有效范围内
+        x0 = torch.clamp(x0, 0, self.terrain_height.shape[1] - 1)
+        x1 = torch.clamp(x1, 0, self.terrain_height.shape[1] - 1)
+        y0 = torch.clamp(y0, 0, self.terrain_height.shape[0] - 1)
+        y1 = torch.clamp(y1, 0, self.terrain_height.shape[0] - 1)
+
+        # 获取四个点的高度值
+        # 使用广播机制处理批量数据
+        Q11 = self.terrain_height[y0, x0]
+        Q21 = self.terrain_height[y0, x1]
+        Q12 = self.terrain_height[y1, x0]
+        Q22 = self.terrain_height[y1, x1]
+
+        # 计算双线性插值
+        wx = fx - x0
+        wy = fy - y0
+
+        height = (
+            (1 - wx) * (1 - wy) * Q11 +
+            wx * (1 - wy) * Q21 +
+            (1 - wx) * wy * Q12 +
+            wx * wy * Q22
+        )
+        base_pos[:,2] -= height
+        return base_pos
 
 
     # ------------ reward functions----------------

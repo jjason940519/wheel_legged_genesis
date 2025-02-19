@@ -18,7 +18,7 @@ def main():
     gs.init(backend=gs.vulkan)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
+    env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
     # reward_cfg["reward_scales"] = {} #why？
     env = WheelLeggedEnv(
         num_envs=1,
@@ -28,6 +28,7 @@ def main():
         command_cfg=command_cfg,
         curriculum_cfg=curriculum_cfg,
         domain_rand_cfg=domain_rand_cfg,
+        terrain_cfg=terrain_cfg,
         show_viewer=True,
     )
     print(reward_cfg)
@@ -38,7 +39,7 @@ def main():
 
     obs, _ = env.reset()
     env.eval()  #测试模式
-    pad = gamepad.control_gamepad(command_cfg,[2.4,1.0,1.0])
+    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,1.0])
     with torch.no_grad():
         while True:
             actions = policy(obs)
