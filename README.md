@@ -8,7 +8,7 @@ python >= 3.10
 NVIDIA/AMD GPU or CPU  
 ## must（必须）
 **Use the main branch of Genesis to install it locally, and you cannot use Genesis 0.2.1 Release**  
-**不能使用pip安装genesis的0.2.1版本，使用main分支的本地安装，因为有API不用**  
+**不能使用pip安装genesis的0.2.1版本，使用main分支的本地安装，因为有API更新**  
 ## Test & Development Platform  
 1. i5 12400f +  Geforce RTX4070  
 2. i7 12700kf + Radeon Rx7900xt
