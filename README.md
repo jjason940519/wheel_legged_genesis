@@ -32,7 +32,7 @@ Install Genesis:
 install tensorboard:    
 `pip install tensorboard`  
 `pip install pygame`   
-`pip install python_opencv`  
+`pip install opencv-python`  
 
 install rsl-rl:    
 `cd rsl_rl && pip install -e .`  
