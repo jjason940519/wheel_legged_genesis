@@ -1,5 +1,6 @@
 # wheel_legged_genesis
-Reinforcement learning of wheel-legged robots based on Genesis  
+Reinforcement learning of wheel-legged robots based on Genesis 
+![combined_image](https://github.com/user-attachments/assets/d4737ab4-43e5-49a3-aee9-a40272bde377)  
 ## System Requirements  
 Ubuntu 20.04/22.04/24.04  
 python >= 3.10
@@ -48,7 +49,8 @@ train:
 test:  
 `python locomotion/wheel_legged_eval.py`  
 train:  
-`python locomotion/wheel_legged_train.py`  
+`python locomotion/wheel_legged_train.py`  ![combined_image](https://github.com/user-attachments/assets/e8b86ac6-2360-422a-ab91-111a78ffe880)
+
 
 ### gamepad & keyboard
 **gamepad**  
