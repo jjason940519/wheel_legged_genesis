@@ -6,7 +6,7 @@ import shutil
 from wheel_legged_env import WheelLeggedEnv
 from rsl_rl.runners import OnPolicyRunner
 
-import genesis as gs
+import genesis as gs # type: ignore
 
 
 def get_train_cfg(exp_name, max_iterations):
@@ -168,7 +168,6 @@ def get_cfgs():
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.005,
             "collision": -0.01,  #base接触地面碰撞力越大越惩罚
-            # "lift_feet": -1.0, 
         },
     }
     command_cfg = {
@@ -203,10 +202,12 @@ def get_cfgs():
     }
     #地形配置
     terrain_cfg = {
-        "terrain":False, #是否开启地形
+        "terrain":True, #是否开启地形
+        "train":"agent_train_gym",
+        "eval":"agent_eval_gym",    # agent_eval_gym/circular
         "num_respawn_points":3,
         "respawn_points":[
-            [-10.0, -10.0, 0.0],    #plane地形坐标，一定要有，为了远离其他地形
+            [-20.0, -20.0, 0.0],    #plane地形坐标，一定要有，为了远离其他地形
             [5.0, 5.0, 0.0],
             [15.0, 5.0, 0.08],
         ],

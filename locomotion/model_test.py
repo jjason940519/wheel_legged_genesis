@@ -1,4 +1,4 @@
-import genesis as gs
+import genesis as gs # type: ignore
 import numpy as np
 import time
 import cv2

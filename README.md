@@ -49,13 +49,39 @@ test:
 train:  
 `python locomotion/wheel_legged_train.py`  
 
-### gamepad  
+### gamepad & keyboard
+**gamepad**  
 |key|function|
 |---|--------|
 |LY|lin_vel|
 |RX|ang_vel|
 |LT|height_up|
-|RT|height_down| 
+|RT|height_down|
+|X|Reset|
+
+**keyboard**
+|key|function|
+|---|--------|
+|W|前进 (Forward)|
+|S|后退 (Backward)|
+|A|左移 (Move Left)|
+|D|右移 (Move Right)|
+|Q|左转 (TURN Left)|
+|E|右转 (TURN Right)|
+|Space|站立 (up)|
+|C/Left_Ctrl|下蹲 (down)|
+|Shift|静步(Quiet Walking)|
+|R|重置环境(Reset)|
+## Terrain
+You can use the terrain as agent_eval_gym/agent_train_gym/agent_eval_gym/circular  
+|terrain|description|
+|-------|-----------|
+|agent_train_gym|Rough roads and continuous slopes|
+|agent_eval_gym|The agent_train_gym of the lite version|
+|circular|Circular continuous slopes|
+
+**About custom terrains**
+Please refer to the code in `assets/terrain`    
 ## Suggestion
 When using NVIDIA GPUs, it is recommended that the genesis backend choose gpu or cuda    
 When using AMD GPUs, it is recommended to select vulkan for the genesis backend  
@@ -65,10 +91,19 @@ When using AMD GPUs, it is recommended to select vulkan for the genesis backend
 [别平步了，要不双足吧](https://www.bilibili.com/video/BV1oSN8eUEXw/?share_source=copy_web>)   
 [这是平步模式了](https://www.bilibili.com/video/BV1YoNDevENT/?share_source=copy_web>)    
 [【开源】genesis双轮足机器人强化学习（基础版）](https://www.bilibili.com/video/BV14eKKeiEJB/?share_source=copy_web) 
-## TODO:
-**terrain：**   
-Rough roads, uphill and downhill slopes, and stairs
-**more dof:**
-left_hip and right_hip
+## Changelog
+|version|description|
+|-------|-----------|
+|v0.0.1|Basic functions and efficient training|
+|v0.0.2|add domain rand and curriculum|
+|v0.0.3|Faster and more stable training than v0.0.2|
+|v0.0.5|Terrain training, custom terrain,add keyboard and better curriculum|
+## TODO: 
+- [x] Rough roads:uphill and downhill slopes  
+- [x] Curriculum  
+- [x] Custom terrain  
+- [ ] Interference from external forces  
+- [ ] Sim2Sim：mujoco  
+- [ ] left_hip and right_hip  
 技术交流：  
 ![微信图片_20250214171412_3](https://github.com/user-attachments/assets/958ad5c0-b76e-4446-ba15-1bb4d1ac0383)  

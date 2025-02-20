@@ -1,7 +1,7 @@
 import torch
 import math
-import genesis as gs
-from genesis.utils.geom import quat_to_xyz, transform_by_quat, inv_quat, transform_quat_by_quat
+import genesis as gs # type: ignore
+from genesis.utils.geom import quat_to_xyz, transform_by_quat, inv_quat, transform_quat_by_quat # type: ignore
 import numpy as np
 import cv2
 
@@ -62,15 +62,48 @@ class WheelLeggedEnv:
 
         # add plain
         self.scene.add_entity(gs.morphs.URDF(file="assets/urdf/plane/plane.urdf", fixed=True))
-
-        # add robot
+        # init roboot quat and pos
         self.base_init_pos = torch.tensor(self.env_cfg["base_init_pos"], device=self.device)
         self.base_init_quat = torch.tensor(self.env_cfg["base_init_quat"], device=self.device)
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
+        # add terrain 只能有一个Terrain(genesis v0.2.0)
+        self.horizontal_scale = self.terrain_cfg["horizontal_scale"]
+        self.vertical_scale = self.terrain_cfg["vertical_scale"]
+        self.height_field = cv2.imread("assets/terrain/png/"+self.terrain_cfg["train"]+".png", cv2.IMREAD_GRAYSCALE)
+        self.terrain_height = torch.tensor(self.height_field, device=self.device) * self.vertical_scale
+        if self.terrain_cfg["terrain"]:
+            print("\033[1;35m open terrain\033[0m")
+            if self.mode:
+                self.terrain = self.scene.add_entity(
+                morph=gs.morphs.Terrain(
+                height_field = self.height_field,
+                horizontal_scale=self.horizontal_scale, 
+                vertical_scale=self.vertical_scale,
+                ),)
+                self.base_terrain_pos = torch.zeros((self.num_respawn_points, 3), device=self.device)
+                for i in range(self.num_respawn_points):
+                    self.base_terrain_pos[i] = self.base_init_pos + torch.tensor(self.respawn_points[i], device=self.device)
+                print("\033[1;34m respawn_points: \033[0m",self.base_terrain_pos)
+            else:
+                height_field = cv2.imread("assets/terrain/png/"+self.terrain_cfg["eval"]+".png", cv2.IMREAD_GRAYSCALE)
+                self.terrain = self.scene.add_entity(
+                morph=gs.morphs.Terrain(
+                pos = (1.0,1.0,0.0),
+                height_field = height_field,
+                horizontal_scale=self.horizontal_scale, 
+                vertical_scale=self.vertical_scale,
+                ),)     
+                print("\033[1;34m respawn_points: \033[0m",self.base_init_pos)
+            
+        # add robot
+        base_init_pos = self.base_init_pos.cpu().numpy()
+        if self.terrain_cfg["terrain"]:
+            if self.mode:
+                base_init_pos = self.base_terrain_pos[0].cpu().numpy()
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
                 file="assets/urdf/nz2/urdf/nz2.urdf",
-                pos=self.base_init_pos.cpu().numpy(),
+                pos = base_init_pos,
                 quat=self.base_init_quat.cpu().numpy(),
             ),
         )
@@ -80,33 +113,7 @@ class WheelLeggedEnv:
         #     pos=self.base_init_pos.cpu().numpy()),
         #     vis_mode='collision'
         # )
-
-        height_field = cv2.imread("assets/terrain/png/agent_eval_gym.png", cv2.IMREAD_GRAYSCALE)
-        self.terrain = self.scene.add_entity(
-        morph=gs.morphs.Terrain(
-        pos = (1.0,1.0,0.0),
-        height_field = height_field,
-        horizontal_scale=0.1, 
-        vertical_scale=0.001,
-        ),)
-        
-        # add terrain 只能有一个Terrain(genesis v0.2.0)
-        self.horizontal_scale = self.terrain_cfg["horizontal_scale"]
-        self.vertical_scale = self.terrain_cfg["vertical_scale"]
-        self.height_field = cv2.imread("assets/terrain/png/agent_train_gym.png", cv2.IMREAD_GRAYSCALE)
-        self.terrain_height = torch.tensor(self.height_field, device=self.device) * self.vertical_scale
-        if self.terrain_cfg["terrain"]:
-            self.terrain = self.scene.add_entity(
-            morph=gs.morphs.Terrain(
-            height_field = self.height_field,
-            horizontal_scale=self.horizontal_scale, 
-            vertical_scale=self.vertical_scale,
-            ),)
             
-            self.base_terrain_pos = torch.zeros((self.num_respawn_points, 3), device=self.device)
-            for i in range(self.num_respawn_points):
-                self.base_terrain_pos[i] = self.base_init_pos + torch.tensor(self.respawn_points[i], device=self.device)
-            print("self.base_terrain_pos ",self.base_terrain_pos.size())
         # build
         self.scene.build(n_envs=num_envs)
 
@@ -137,7 +144,7 @@ class WheelLeggedEnv:
             self.reward_functions[name] = getattr(self, "_reward_" + name)
             self.episode_sums[name] = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
 
-        # prepare curriculum reward functions and multiply reward scales by dt
+        # prepare command_ranges lin_vel_x lin_vel_y ang_vel height_target
         self.command_ranges = torch.zeros((self.num_envs, self.num_commands,2),device=self.device,dtype=gs.tc_float)
         self.command_ranges[:,0,0] = self.command_cfg["lin_vel_x_range"][0] * self.command_cfg["base_range"]
         self.command_ranges[:,0,1] = self.command_cfg["lin_vel_x_range"][1] * self.command_cfg["base_range"]
@@ -261,13 +268,15 @@ class WheelLeggedEnv:
         )
 
         # check termination and reset
-        self.check_termination()
+        if(self.mode):
+            self.check_termination()
 
         time_out_idx = (self.episode_length_buf > self.max_episode_length).nonzero(as_tuple=False).flatten()
         self.extras["time_outs"] = torch.zeros_like(self.reset_buf, device=self.device, dtype=gs.tc_float)
         self.extras["time_outs"][time_out_idx] = 1.0
 
-        self.reset_idx(self.reset_buf.nonzero(as_tuple=False).flatten())
+        if(self.mode):
+            self.reset_idx(self.reset_buf.nonzero(as_tuple=False).flatten())
 
         # compute reward
         if(self.mode):
@@ -335,8 +344,25 @@ class WheelLeggedEnv:
 
         # reset base
         self.base_quat[envs_idx] = self.base_init_quat.reshape(1, -1)
-        if self.terrain_cfg["terrain"]:
-            self.base_pos[envs_idx] = self.base_terrain_pos[0] #TODO 如何判断在什么地形复活
+        if self.terrain_cfg["terrain"]:# 线速度达到预设的80%范围，角速度达到50%以上去其他地形
+            if self.mode:
+                #目前认为坡路和崎岖路面是相同难度，所以reset随机选取一个环境去复活
+                reset_buf = self.command_ranges[envs_idx, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.8  # 注意索引 envs_idx
+                reset_buf &= self.command_ranges[envs_idx, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.5 # 注意索引 envs_idx
+                terrain_idx = envs_idx[reset_buf.nonzero(as_tuple=False).flatten()] # 获取 envs_idx 中满足条件的索引
+                non_terrain_idx = envs_idx[(~reset_buf).nonzero(as_tuple=False).flatten()] # 获取 envs_idx 中不满足条件的索引
+                # 设置地形位置
+                if len(terrain_idx) > 0: # 只有当有满足地形重置条件的环境时才执行
+                    #目前认为坡路和崎岖路面是相同难度，所以reset随机选取一个环境去复活
+                    n = len(terrain_idx)
+                    random_idx = torch.randint(1, self.num_respawn_points, (n,)) # 注意从 1 开始，避免使用 base_terrain_pos[0] 作为随机位置
+                    selected_pos = self.base_terrain_pos[random_idx]
+                    self.base_pos[terrain_idx] = selected_pos
+                # 设置非地形位置 (默认位置)
+                if len(non_terrain_idx) > 0:
+                    self.base_pos[non_terrain_idx] = self.base_terrain_pos[0]
+            else:
+                self.base_pos[envs_idx] = self.base_init_pos
         else:
             self.base_pos[envs_idx] = self.base_init_pos   #没开地形就基础
         self.robot.set_pos(self.base_pos[envs_idx], zero_velocity=False, envs_idx=envs_idx)
@@ -370,9 +396,8 @@ class WheelLeggedEnv:
 
     def check_termination(self):
         self.reset_buf = self.episode_length_buf > self.max_episode_length
-        if(self.mode):
-            self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
-            self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
+        self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
+        self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
         # self.reset_buf |= torch.abs(self.base_pos[:, 2]) < self.env_cfg["termination_if_base_height_greater_than"]
         #特殊姿态重置
         # self.reset_buf |= torch.abs(self.left_knee_pos[:,2]) < self.env_cfg["termination_if_knee_height_greater_than"]
@@ -426,8 +451,8 @@ class WheelLeggedEnv:
         # 调整线速度
         lin_min_range, lin_max_range = self.adjust_scale(
             self.lin_vel_error, 
-            0.05,
-            0.1,
+            0.05,   #误差反馈更新
+            0.1,    #err back update
             self.curriculum_lin_vel_scale, 
             self.curriculum_cfg["curriculum_lin_vel_step"], 
             self.curriculum_cfg["curriculum_lin_vel_min_range"], 
@@ -435,10 +460,10 @@ class WheelLeggedEnv:
         )
         self.command_ranges[:, 0, 0] = lin_min_range.squeeze()
         self.command_ranges[:, 0, 1] = lin_max_range.squeeze()
-        # 调整角速度
+        # 调整角速度    角速度误差可以大一些，因为comand范围更大
         ang_min_range, ang_max_range = self.adjust_scale(
             self.ang_vel_error, 
-            0.15,
+            0.2,
             0.25,
             self.curriculum_ang_vel_scale, 
             self.curriculum_cfg["curriculum_ang_vel_step"], 
@@ -454,40 +479,32 @@ class WheelLeggedEnv:
     def get_relative_terrain_pos(self, base_pos):
         if not self.terrain_cfg["terrain"]:
             return base_pos
-        """
-        对多个 (x, y) 坐标进行双线性插值计算地形高度
-        """
+        #对多个 (x, y) 坐标进行双线性插值计算地形高度
         # 提取x和y坐标
         x = base_pos[:, 0]
         y = base_pos[:, 1]
-
         # 转换为浮点数索引
         fx = x / self.horizontal_scale
         fy = y / self.horizontal_scale
-
         # 获取四个最近的整数网格点，确保在有效范围内
         x0 = torch.floor(fx).int()
         x1 = torch.min(x0 + 1, torch.full_like(x0, self.terrain_height.shape[1] - 1))
         y0 = torch.floor(fy).int()
         y1 = torch.min(y0 + 1, torch.full_like(y0, self.terrain_height.shape[0] - 1))
-
         # 确保x0, x1, y0, y1在有效范围内
         x0 = torch.clamp(x0, 0, self.terrain_height.shape[1] - 1)
         x1 = torch.clamp(x1, 0, self.terrain_height.shape[1] - 1)
         y0 = torch.clamp(y0, 0, self.terrain_height.shape[0] - 1)
         y1 = torch.clamp(y1, 0, self.terrain_height.shape[0] - 1)
-
         # 获取四个点的高度值
         # 使用广播机制处理批量数据
         Q11 = self.terrain_height[y0, x0]
         Q21 = self.terrain_height[y0, x1]
         Q12 = self.terrain_height[y1, x0]
         Q22 = self.terrain_height[y1, x1]
-
         # 计算双线性插值
         wx = fx - x0
         wy = fy - y0
-
         height = (
             (1 - wx) * (1 - wy) * Q11 +
             wx * (1 - wy) * Q21 +
@@ -584,13 +601,3 @@ class WheelLeggedEnv:
     def _reward_collision(self):
         # 接触地面惩罚 力越大惩罚越大
         return torch.square(self.connect_force[:,0,:]).sum(dim=1)
-
-    # def _reward_lift_feet(self):
-    #     # 抬脚惩罚
-    #     lift_feet = torch.sum(torch.square(self.connect_force[:,5,:]) 
-    #                           + torch.square(self.connect_force[:,6,:]),dim=1)
-    #     if lift_feet.mean() > 0:
-    #         rew = torch.zeros(1, device=self.device, dtype=gs.tc_float)
-    #     else:
-    #         rew = torch.ones(1, device=self.device, dtype=gs.tc_float)
-    #     return rew
