@@ -49,8 +49,7 @@ train:
 test:  
 `python locomotion/wheel_legged_eval.py`  
 train:  
-`python locomotion/wheel_legged_train.py`  ![combined_image](https://github.com/user-attachments/assets/e8b86ac6-2360-422a-ab91-111a78ffe880)
-
+`python locomotion/wheel_legged_train.py`  
 
 ### gamepad & keyboard
 **gamepad**  
