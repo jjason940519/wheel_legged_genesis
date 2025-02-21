@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "input.h": "c",
+        "usb.h": "c",
+        "kernel.h": "c",
+        "module.h": "c",
+        "hid.h": "c",
+        "*.ipp": "c",
+        "functional": "c",
+        "random": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

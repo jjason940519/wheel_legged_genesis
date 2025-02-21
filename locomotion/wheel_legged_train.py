@@ -141,7 +141,7 @@ def get_cfgs():
             "ang_vel": 0.5,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
-            "dof_acc": 0.0025,
+            # "dof_acc": 0.0025,
             "height_measurements": 5.0,
         },
     }
@@ -168,6 +168,7 @@ def get_cfgs():
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.005,
             "collision": -0.01,  #base接触地面碰撞力越大越惩罚
+            "terrain":0.1,
         },
     }
     command_cfg = {
@@ -185,20 +186,20 @@ def get_cfgs():
             "projected_gravity",
             "similar_legged", 
         },
-        "curriculum_lin_vel_step":0.01,   #百分比
+        "curriculum_lin_vel_step":0.05,   #百分比
         "curriculum_ang_vel_step":0.01,   #百分比
         "curriculum_lin_vel_min_range":0.3,   #百分比
         "curriculum_ang_vel_min_range":0.15,   #百分比
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
-        "friction_ratio_range":[0.8 , 1.2],
-        "random_mass_shift":0.2,
-        "random_com_shift":0.05,
-        "random_KP":[0.9, 1.1],
-        "random_KD":[0.9, 1.1],
-        "dof_damping_range":[0.0 , 0.0], # genesis bug
-        "dof_stiffness_range":[0.0 , 0.0], # genesis bug
+        "friction_ratio_range":[0.6 , 1.2],
+        "random_mass_shift":0.5,
+        "random_com_shift":0.08,
+        "random_KP":[0.9, 1.1], #none v0.0.6
+        "random_KD":[0.9, 1.1], #none v0.0.6
+        "dof_damping_range":[0.0 , 0.0], # none v0.0.6
+        "dof_stiffness_range":[0.0 , 0.0], # none v0.0.6
     }
     #地形配置
     terrain_cfg = {

@@ -31,26 +31,26 @@ plane = scene.add_entity(
 )
 
 robot = scene.add_entity(
-    gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
+    # gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
+    # pos=(0.0, 0.0, 0.15)
+    # ),
+    gs.morphs.MJCF(file="assets/mjcf/nz2/nz2.xml",
     pos=(0.0, 0.0, 0.15)
     ),
-    # gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
-    # pos=(0.0, 0.0, 0.265)
-    # ),
-    # vis_mode='collision'
+    vis_mode='collision'
 )
 
 height_field = cv2.imread("assets/terrain/png/agent_train_gym.png", cv2.IMREAD_GRAYSCALE)
-terrain_height = torch.tensor(height_field) * 0.1
-print(terrain_height.size())
-terrain = scene.add_entity(
-        morph=gs.morphs.Terrain(
-        # pos = (0.0,0.0,0.0),
-        height_field = height_field,
-        horizontal_scale=0.1, 
-        vertical_scale=0.001,
-        ),
-    )
+# terrain_height = torch.tensor(height_field) * 0.1
+# print(terrain_height.size())
+# terrain = scene.add_entity(
+#         morph=gs.morphs.Terrain(
+#         # pos = (0.0,0.0,0.0),
+#         height_field = height_field,
+#         horizontal_scale=0.1, 
+#         vertical_scale=0.001,
+#         ),
+#     )
 
 cam = scene.add_camera(
     res    = (640, 480),
@@ -102,7 +102,7 @@ while True:
     #         dofs_idx,
     #     )
     scene.step()
-    # print(robot.get_pos())
+    print(robot.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)
     # force = robot.get_links_net_contact_force()

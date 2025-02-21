@@ -8,11 +8,12 @@ from rsl_rl.runners import OnPolicyRunner
 
 import genesis as gs # type: ignore
 import gamepad
-
+import copy
+  
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("--ckpt", type=int, default=4600)
+    parser.add_argument("--ckpt", type=int, default=2700)
     args = parser.parse_args()
     
 
@@ -20,7 +21,8 @@ def main():
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
-    terrain_cfg["eval"] = "circular" #agent_eval_gym/agent_train_gym/circular
+    terrain_cfg["terrain"] = True
+    terrain_cfg["eval"] = "agent_eval_gym" #agent_eval_gym/agent_train_gym/circular
     env = WheelLeggedEnv(
         num_envs=1,
         env_cfg=env_cfg,
@@ -38,11 +40,30 @@ def main():
     resume_path = os.path.join(log_dir, f"model_{args.ckpt}.pt")
     runner.load(resume_path)
     policy = runner.get_inference_policy(device="cuda:0")
+    #jit
+    model = copy.deepcopy(runner.alg.actor_critic.actor).to('cpu')
+    torch.jit.script(model).save(log_dir+"/policy.pt")
+    # 加载模型进行测试
+    print("\n--- 模型加载测试 ---")
+    try:
+        loaded_policy = torch.jit.load(log_dir + "/policy.pt")
+        loaded_policy.eval() # 设置为评估模式
+        loaded_policy.to('cuda')
+        print("模型加载成功!")
+    except Exception as e:
+        print(f"模型加载失败: {e}")
+        exit()
+    print("gs.tc_float ",gs.tc_float)
     obs, _ = env.reset()
     pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14,0.05])
     with torch.no_grad():
         while True:
-            actions = policy(obs)
+            # actions = policy(obs)
+            actions = loaded_policy(obs)
+            
+            # data_list = [[1.0,1.0,1.0,1.0,1.0,1.0]]
+            # actions = torch.tensor(data_list,device='cuda') 
+            # print(obs)
             obs, _, rews, dones, infos = env.step(actions)
             comands,reset_flag = pad.get_commands()
             # print("comands: ",comands)

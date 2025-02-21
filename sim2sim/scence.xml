@@ -17,13 +17,14 @@
             width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
         <material name="plane" reflectance="0.3" texture="plane" texrepeat="1 1" texuniform="true" />
         <!-- ；这里要使用绝对路径 -->
-        <hfield name="terrain" file="./agent_eval_gym.png" size="10.5 10.5 .6 0.1" />
+        <hfield name="terrain" file="/home/albusgive2/wheel_legged_genesis/assets/terrain/png/agent_eval_gym.png" size="10.5 10.5 .6 0.1" />
     </asset>
-
+    
+    <include file="/home/albusgive2/wheel_legged_genesis/assets/mjcf/nz2/nz2.xml"/>
     <worldbody>
         <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="plane"
             condim="3" />
-        <geom type="hfield" hfield="terrain" pos="0 0 0" size="10.5 10.5 .6" />
+        <!-- <geom type="hfield" hfield="terrain" pos="11 11 0" size="10.5 10.5 .6" /> -->
         <light directional="true" ambient=".3 .3 .3" pos="0 0 30" dir="0 -0.5 -1"
             diffuse="0.5 0.5 0.5" specular="0.5 0.5 0.5" />
        
