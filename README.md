@@ -1,5 +1,6 @@
 # wheel_legged_genesis
-Reinforcement learning of wheel-legged robots based on Genesis  
+Reinforcement learning of wheel-legged robots based on Genesis 
+![combined_image](https://github.com/user-attachments/assets/d4737ab4-43e5-49a3-aee9-a40272bde377)  
 ## System Requirements  
 Ubuntu 20.04/22.04/24.04  
 python >= 3.10
@@ -7,7 +8,7 @@ python >= 3.10
 NVIDIA/AMD GPU or CPU  
 ## must（必须）
 **Use the main branch of Genesis to install it locally, and you cannot use Genesis 0.2.1 Release**  
-**不能使用pip安装genesis的0.2.1版本，使用main分支的本地安装，因为有API不用**  
+**不能使用pip安装genesis的0.2.1版本，使用main分支的本地安装，因为有API更新**  
 ## Test & Development Platform  
 1. i5 12400f +  Geforce RTX4070  
 2. i7 12700kf + Radeon Rx7900xt
@@ -32,6 +33,7 @@ Install Genesis:
 install tensorboard:    
 `pip install tensorboard`  
 `pip install pygame`   
+`pip install opencv-python`  
 
 install rsl-rl:    
 `cd rsl_rl && pip install -e .`  
@@ -106,4 +108,4 @@ When using AMD GPUs, it is recommended to select vulkan for the genesis backend
 - [ ] Sim2Sim：mujoco  
 - [ ] left_hip and right_hip  
 技术交流：  
-![微信图片_20250214171412_3](https://github.com/user-attachments/assets/958ad5c0-b76e-4446-ba15-1bb4d1ac0383)  
+![微信图片_2025-02-20_170723_775](https://github.com/user-attachments/assets/278bf72b-448e-4fb3-af68-ab4dcfb089bb)  
