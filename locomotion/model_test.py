@@ -31,12 +31,12 @@ plane = scene.add_entity(
 )
 
 robot = scene.add_entity(
-    # gs.morphs.URDF(file="assets/urdf/nz2/urdf/nz2.urdf",
-    # pos=(0.0, 0.0, 0.15)
-    # ),
-    gs.morphs.MJCF(file="assets/mjcf/nz2/nz2.xml",
+    gs.morphs.URDF(file="assets/urdf/nz/urdf/nz.urdf",
     pos=(0.0, 0.0, 0.15)
     ),
+    # gs.morphs.MJCF(file="assets/mjcf/urdf2nz/urdf2nz.xml",
+    # pos=(0.0, 0.0, 0.15)
+    # ),
     vis_mode='collision'
 )
 
@@ -61,53 +61,51 @@ cam = scene.add_camera(
 )
 scene.build(n_envs=2)
 
-# jnt_names = [
-#     # "left_hip_joint",
-#     "left_thigh_joint",
-#     "left_calf_joint",
-#     # "right_hip_joint",
-#     "right_thigh_joint",
-#     "right_calf_joint",
-#     "left_wheel_joint",
-#     "right_wheel_joint",
-# ]
-# dofs_idx = [robot.get_joint(name).dof_idx_local for name in jnt_names]
-# robot.set_dofs_kp(
-#     kp = np.array([20,20,20,20,40,40]),
-#     dofs_idx_local = dofs_idx,
-# )
-# robot.set_dofs_kv(
-#     kv = np.array([0.5,0.5,0.5,0.5,0.5,0.5]),
-#     dofs_idx_local = dofs_idx,
-# )
-# left_knee = robot.get_joint("left_calf_joint")
+jnt_names = [
+    # "left_hip_joint",
+    "left_thigh_joint",
+    "left_calf_joint",
+    # "right_hip_joint",
+    "right_thigh_joint",
+    "right_calf_joint",
+    "left_wheel_joint",
+    "right_wheel_joint",
+]
+dofs_idx = [robot.get_joint(name).dof_idx_local for name in jnt_names]
+robot.set_dofs_kp(
+    kp = np.array([30,30,30,30,30,30]),
+    dofs_idx_local = dofs_idx,
+)
+robot.set_dofs_kv(
+    kv = np.array([1.2,1.2,1.2,1.2,1.2,1.2]),
+    dofs_idx_local = dofs_idx,
+)
+left_knee = robot.get_joint("left_calf_joint")
 
-# print(robot.n_links)
-# link = robot.get_link("base_link")
-# print(link.idx)
-# link = robot.get_link("left_wheel_link")
-# print(link.idx)
-# link = robot.get_link("right_wheel_link")
-# print(link.idx)
+print(robot.n_links)
+link = robot.get_link("left_wheel_link")
+print(link.idx)
+link = robot.get_link("right_wheel_link")
+print(link.idx)
 
 # 渲染rgb、深度、分割掩码和法线图
 # rgb, depth, segmentation, normal = cam.render(rgb=True, depth=True, segmentation=True, normal=True)
 
 # cam.start_recording()
 import numpy as np
-
+scene.step()
 while True:
-    # robot.control_dofs_position(
-    #         np.array([0.0, 0.0, 0.0, 0.0, 10.0, 10.0]),
-    #         dofs_idx,
-    #     )
+    robot.control_dofs_position(
+            np.array([-0.5, 0.0, -0.5, 0.0, 0.0, 0.0]),
+            dofs_idx,
+        )
     scene.step()
-    print(robot.get_pos())
+    # print(robot.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)
     # force = robot.get_links_net_contact_force()
     # dof_vel = robot.get_dofs_velocity()
-    # print("dof_vel:",dof_vel)
+    print("dof_pos:",robot.get_dofs_position(dofs_idx))
     # time.sleep(0.1)
     cam.render()
 # cam.stop_recording(save_to_filename='video.mp4', fps=60)

@@ -149,26 +149,26 @@ def get_cfgs():
     reward_cfg = {
         "tracking_lin_sigma": 0.25, 
         "tracking_ang_sigma": 0.25, 
-        "tracking_height_sigma": 0.0015,
-        "tracking_similar_legged_sigma": 0.5,
+        "tracking_height_sigma": 0.005,
+        "tracking_similar_legged_sigma": 0.05,   
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 1.2,
-            "lin_vel_z": -0.02, #大了影响高度变换速度
+            "tracking_base_height": 2.5,    #和similar_legged对抗，similar_legged先提升会促进此项
+            "lin_vel_z": -0.5, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
-            "projected_gravity": 5.0,
-            "similar_legged": 0.5,
+            "projected_gravity": 6.0,
+            "similar_legged": 1.0,  #tracking_base_height和knee_height对抗
             "dof_vel": -2.5e-7,
             "dof_acc": -1.25e-9,
             "dof_force": -0.0006,
             "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.005,
-            "collision": -0.01,  #base接触地面碰撞力越大越惩罚
-            "terrain":0.1,
+            "collision": -0.01,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
+            "terrain":0.0,
         },
     }
     command_cfg = {
@@ -193,9 +193,9 @@ def get_cfgs():
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
-        "friction_ratio_range":[0.6 , 1.2],
-        "random_mass_shift":0.5,
-        "random_com_shift":0.08,
+        "friction_ratio_range":[0.8 , 1.2],
+        "random_mass_shift":0.2,
+        "random_com_shift":0.05,
         "random_KP":[0.9, 1.1], #none v0.0.6
         "random_KD":[0.9, 1.1], #none v0.0.6
         "dof_damping_range":[0.0 , 0.0], # none v0.0.6
@@ -203,7 +203,7 @@ def get_cfgs():
     }
     #地形配置
     terrain_cfg = {
-        "terrain":True, #是否开启地形
+        "terrain":False, #是否开启地形
         "train":"agent_train_gym",
         "eval":"agent_eval_gym",    # agent_eval_gym/circular
         "num_respawn_points":3,
@@ -226,7 +226,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.gpu)
+    gs.init(logging_level="warning",backend=gs.vulkan)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()

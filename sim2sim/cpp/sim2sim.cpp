@@ -31,7 +31,7 @@
 #include <Eigen/StdVector>
 #include <gamepad.h>
 
-auto device = torch::kCUDA;
+auto device = torch::kCPU;
 
 // model input & output
 ENV_CFG env_cfg;
@@ -154,13 +154,31 @@ std::vector<float> world2self(std::vector<float> &quat, std::vector<float> v) {
   return world_angle_speed;
 }
 
-template <typename T> void cout_vector(T data, std::string name) {
-  std::cout << "\033[32m" << name << ": ";
+enum class Color {
+  Red = 31,
+  Green = 32,
+  Yellow = 33,
+  Blue = 34,
+  Magenta = 35,
+  Cyan = 36,
+  White = 37,
+  Reset = 0
+};
+
+// 打印向量，支持选择颜色
+template <typename T>
+void cout_vector(const T &data, const std::string &name,
+                 Color color = Color::Reset) {
+  // 选择颜色并打印
+  std::cout << "\033[" << static_cast<int>(color) << "m" << name << ": ";
   std::cout << std::fixed << std::setprecision(6) << std::endl;
-  for (auto &i : data) {
+
+  for (const auto &i : data) {
     std::cout << i << " ";
   }
-  std::cout << "\033[0m" << std::endl;
+
+  // 重置颜色
+  std::cout << "\033[" << static_cast<int>(Color::Reset) << "m" << std::endl;
 }
 
 void compute_ctrl(std::vector<float> act) {
@@ -208,9 +226,7 @@ std::vector<float> compute_observations(std::vector<float> commands) {
   auto projected_gravity = world2self(base_quat, gravity_vec);
   for (auto &i : projected_gravity) {
     obs.push_back(i);
-    // std::cout<<i<<" ";
   }
-  // std::cout<<std::endl;
 
   // command---------- num 4
   for (int i = 0; i < (int)obs_sacle.command_scale.size(); i++) {
@@ -383,6 +399,7 @@ int main(int argc, const char **argv) {
     // std::endl;
 
     // std::cout<<output_tensor<<std::endl;
+    cout_vector(slice_obs_buf, "slice_obs_buf",Color::Green);
 
     // 裁减action
     output_tensor = torch::clip(output_tensor, -action_cfg.clip_actions,
@@ -394,10 +411,11 @@ int main(int argc, const char **argv) {
     // vec = {-0.1131,  1.3038, -0.1887,  1.2092,  0.0219,  0.0375};
     // vec = {1.0,1.0,1.0,1.0,1.0,1.0};
     compute_ctrl(vec);
+    actions={-0.5,0.7,-0.5,0.7,0.0,0.0};
     for (int i = 0; i < env_cfg.num_actions; i++) {
       d->ctrl[i] = actions[i];
     }
-    cout_vector(actions, "actions");
+    cout_vector(vec, "vec",Color::Red);
 
     for (int i = 0; i < 5; i++) // timestep 当前设置0.002
       mj_step(m, d);

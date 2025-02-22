@@ -64,7 +64,7 @@ class WheelLeggedEnv:
         self.scene.add_entity(gs.morphs.URDF(file="assets/urdf/plane/plane.urdf", fixed=True))
         # init roboot quat and pos
         self.base_init_pos = torch.tensor(self.env_cfg["base_init_pos"], device=self.device)
-        # self.base_init_pos = torch.tensor((0.0, 0.0, 0.265),device=self.device)
+        self.base_init_pos = torch.tensor((0.0, 0.0, 0.285),device=self.device)
         self.base_init_quat = torch.tensor(self.env_cfg["base_init_quat"], device=self.device)
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
         # add terrain 只能有一个Terrain(genesis v0.2.1)
@@ -103,13 +103,13 @@ class WheelLeggedEnv:
                 base_init_pos = self.base_terrain_pos[0].cpu().numpy()
         # self.robot = self.scene.add_entity(
         #     gs.morphs.URDF(
-        #         file="assets/urdf/nz2/urdf/nz2.urdf",
+        #         file="assets/urdf/nz/urdf/nz.urdf",
         #         pos = base_init_pos,
         #         quat=self.base_init_quat.cpu().numpy(),
         #     ),
         # )
         self.robot = self.scene.add_entity(
-            gs.morphs.MJCF(file="assets/mjcf/nz2/nz2.xml",
+            gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
             pos=self.base_init_pos.cpu().numpy()),
             vis_mode='collision'
         )
@@ -259,7 +259,7 @@ class WheelLeggedEnv:
         self.right_knee_pos[:] = self.right_knee.get_pos()
         #碰撞力
         self.connect_force = self.robot.get_links_net_contact_force()
-        
+
         # update last
         self.last_base_lin_vel[:] = self.base_lin_vel[:]
         self.last_base_ang_vel[:] = self.base_ang_vel[:]
@@ -303,7 +303,6 @@ class WheelLeggedEnv:
             self._resample_commands(envs_idx)
             # self.curriculum_commands()
         # else:
-        #     print("base_ang_vel: ",self.base_ang_vel[0,2])
         #     print("base_lin_vel: ",self.base_lin_vel[0,:])
             
         # compute observations
@@ -321,6 +320,8 @@ class WheelLeggedEnv:
         )
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
+
+        print("slice_obs_buf: ",self.slice_obs_buf)
         
         # Combine the current observation with historical observations (e.g., along the time axis)
         self.obs_buf = torch.cat([self.history_obs_buf, self.slice_obs_buf.unsqueeze(1)], dim=1).view(self.num_envs, -1)

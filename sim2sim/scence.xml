@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mujoco model="inverted_pendulum">
     <compiler angle="radian" meshdir="meshes" autolimits="true" />
-    <option timestep="0.01" gravity="0 0 -9.81" integrator="implicitfast" />
+    <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast" />
 
     <visual>
         <!-- 质量 -->
@@ -17,10 +17,10 @@
             width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
         <material name="plane" reflectance="0.3" texture="plane" texrepeat="1 1" texuniform="true" />
         <!-- ；这里要使用绝对路径 -->
-        <hfield name="terrain" file="/home/albusgive2/wheel_legged_genesis/assets/terrain/png/agent_eval_gym.png" size="10.5 10.5 .6 0.1" />
+        <hfield name="terrain" file="/home/albusgive/wheel_legged_genesis/assets/terrain/png/agent_eval_gym.png" size="10.5 10.5 .6 0.1" />
     </asset>
     
-    <include file="/home/albusgive2/wheel_legged_genesis/assets/mjcf/nz2/nz2.xml"/>
+    <include file="/home/albusgive/wheel_legged_genesis/assets/mjcf/nz/nz.xml"/>
     <worldbody>
         <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="plane"
             condim="3" />
