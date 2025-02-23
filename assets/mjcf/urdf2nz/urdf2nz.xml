@@ -1,7 +1,7 @@
 <mujoco model="nz">
   <compiler angle="radian" />
   <!-- integrator="RK4"  -->
-  <option timestep="0.01" />
+  <option timestep="0.002" />
   <asset>
     <mesh name="base_link" file="base_link.STL" />
     <mesh name="left_hip_link" file="left_hip_link.STL" />
@@ -17,11 +17,11 @@
   </asset>
 
   <worldbody>
-    <body name="urdf2nz" pos="0 0 0.0">
-    <inertial pos="0 0 0" quat="1 0 0 0" mass="4.1216284" diaginertia="0.001 0.001 0.001"/>  
+    <body name="urdf2nz" pos="0 0 0.16">
+    <!-- <inertial pos="0 0 0" quat="1 0 0 0" mass="4.1216284" diaginertia="0.0498463 0.0768737 0.1033353"/>   -->
       <freejoint/>
       <site name="imu"/>
-      <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="base_link" />
+      <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="base_link" mass="4.1216284"/>
       <geom pos="0.151248 0.103302 0.074" quat="1 -0.00036509 0 0" type="mesh"
         rgba="0.79216 0.81961 0.93333 1" mesh="left_hip_link" contype="2" conaffinity="2" />
       <geom pos="0.15125 -0.096698 0.074146" quat="1 -0.00036509 0 0" type="mesh"
@@ -86,12 +86,12 @@
     </body>
   </worldbody>
 
-  <actuator>
+ <actuator>
     <!-- <position joint="left_hip_joint" name="left_hip_joint" kp="80" kv="2" ctrlrange="-0.31416 0.31416"/> -->
-    <position joint="left_thigh_joint" name="left_thigh_joint" kp="30" kv="1.2" ctrlrange="-0.785399 0.785399" forcerange="-40 40"/>
+    <position joint="left_thigh_joint" name="left_thigh_joint" kp="30" kv="1.2" ctrlrange="-1.0472 0.5236" forcerange="-40 40"/>
     <position joint="left_calf_joint" name="left_calf_joint" kp="30" kv="1.2" ctrlrange="0 1.3963" forcerange="-40 40"/>
     <!-- <position joint="right_hip_joint" name="right_hip_joint" kp="30" kv="1.2" ctrlrange="-0.31416 0.31416"/> -->
-    <position joint="right_thigh_joint" name="right_thigh_joint" kp="30" kv="1.2" ctrlrange="-0.785399 0.785399" forcerange="-40 40"/>
+    <position joint="right_thigh_joint" name="right_thigh_joint" kp="30" kv="1.2" ctrlrange="-1.0472 0.5236" forcerange="-40 40"/>
     <position joint="right_calf_joint" name="right_calf_joint" kp="30" kv="1.2" ctrlrange="0 1.3963" forcerange="-40 40"/>
     <intvelocity joint="left_wheel_joint" name="left_wheel_joint" kp="30" kv="1.2"  forcerange="-40 40" actrange="-100 100"/>
     <intvelocity joint="right_wheel_joint" name="right_wheel_joint" kp="30" kv="1.2"  forcerange="-40 40" actrange="-100 100"/>
@@ -102,8 +102,8 @@
     <jointpos name='left_calf_joint_p' joint='left_calf_joint' />
     <jointpos name='right_thigh_joint_p' joint='right_thigh_joint' />
     <jointpos name='right_calf_joint_p' joint='right_calf_joint' />
-    <jointpos name='left_wheel_joint_p' joint='left_wheel_joint' />
-    <jointpos name='right_wheel_joint_p' joint='right_wheel_joint' />
+    <!-- <jointpos name='left_wheel_joint_p' joint='left_wheel_joint' />
+    <jointpos name='right_wheel_joint_p' joint='right_wheel_joint' /> -->
 
     <jointvel name='left_thigh_joint_v' joint='left_thigh_joint' />
     <jointvel name='left_calf_joint_v' joint='left_calf_joint' />
@@ -112,8 +112,8 @@
     <jointvel name='left_wheel_joint_v' joint='left_wheel_joint' />
     <jointvel name='right_wheel_joint_v' joint='right_wheel_joint' />
 
-    <framequat name='orientation' objtype='body' objname='urdf2nz' />
-    <framelinvel name="base_lin_vel" objtype="body" objname="urdf2nz" />
+    <framequat name='orientation' objtype='site' objname='imu' />
+    <subtreelinvel name="base_lin_vel" body="urdf2nz" />
     <gyro name='base_ang_vel' site='imu' />
     <framepos name='base_pos' objtype='body' objname='urdf2nz' />
     <!-- <accelerometer name="projected_gravity" site="imu" /> -->

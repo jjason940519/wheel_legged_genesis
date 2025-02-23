@@ -172,8 +172,9 @@ class OnPolicyRunner:
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
-        self.writer.add_scalar('Curriculum/lin_vel_range', self.env.command_ranges[:,0,1].mean(), locs['it'])
-        self.writer.add_scalar('Curriculum/ang_vel_range', self.env.command_ranges[:,2,1].mean(), locs['it'])
+        self.writer.add_scalar('Curriculum/mean_lin_vel_range', self.env.command_ranges[:,0,1].mean(), locs['it'])
+        self.writer.add_scalar('Curriculum/mean_ang_vel_range', self.env.command_ranges[:,2,1].mean(), locs['it'])
+        self.writer.add_scalar('Curriculum/mean_min_height_range', self.env.command_ranges[:,3,0].mean(), locs['it'])
         if len(locs['rewbuffer']) > 0:
             self.writer.add_scalar('Train/mean_reward', statistics.mean(locs['rewbuffer']), locs['it'])
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['lenbuffer']), locs['it'])
@@ -207,8 +208,9 @@ class OnPolicyRunner:
 
         log_string += ep_string
         log_string += (f"""{'#' * width}\n"""
-                          f"""{'lin_vel_range:':>{pad}} {self.env.command_ranges[:,0,1].mean()}\n"""
-                          f"""{'ang_vel_range:':>{pad}} {self.env.command_ranges[:,2,1].mean()}\n""")
+                          f"""{'mean_lin_vel_range:':>{pad}} {self.env.command_ranges[:,0,1].mean()}\n"""
+                          f"""{'mean_ang_vel_range:':>{pad}} {self.env.command_ranges[:,2,1].mean()}\n"""
+                          f"""{'mean_min_height_range:':>{pad}} {self.env.command_ranges[:,3,0].mean()}\n""")
         log_string += (f"""{'-' * width}\n"""
                        f"""{'Total timesteps:':>{pad}} {self.tot_timesteps}\n"""
                        f"""{'Iteration time:':>{pad}} {iteration_time:.2f}s\n"""

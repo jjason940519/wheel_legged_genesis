@@ -32,12 +32,12 @@ plane = scene.add_entity(
 
 robot = scene.add_entity(
     gs.morphs.URDF(file="assets/urdf/nz/urdf/nz.urdf",
-    pos=(0.0, 0.0, 0.15)
+    pos=(0.0, 0.0, 0.0)
     ),
     # gs.morphs.MJCF(file="assets/mjcf/urdf2nz/urdf2nz.xml",
     # pos=(0.0, 0.0, 0.15)
     # ),
-    vis_mode='collision'
+    # vis_mode='collision'
 )
 
 height_field = cv2.imread("assets/terrain/png/agent_train_gym.png", cv2.IMREAD_GRAYSCALE)
@@ -95,11 +95,11 @@ print(link.idx)
 import numpy as np
 scene.step()
 while True:
-    robot.control_dofs_position(
-            np.array([-0.5, 0.0, -0.5, 0.0, 0.0, 0.0]),
-            dofs_idx,
-        )
-    scene.step()
+    # robot.control_dofs_position(
+    #         np.array([-0.5, 0.0, -0.5, 0.0, 0.0, 0.0]),
+    #         dofs_idx,
+    #     )
+    # scene.step()
     # print(robot.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)

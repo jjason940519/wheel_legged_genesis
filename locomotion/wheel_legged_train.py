@@ -59,18 +59,7 @@ def get_train_cfg(exp_name, max_iterations):
 def get_cfgs():
     env_cfg = {
         "num_actions": 6,
-        # joint/link names
-        "link_names":[
-            "base_link",
-            "left_calf_link",
-            "left_hip_link",
-            "left_thigh_link",
-            "left_wheel_link",
-            "right_calf_link",
-            "right_hip_link",
-            "right_thigh_link",
-            "right_wheel_link",
-        ],
+        # joint names
         "default_joint_angles": {  # [rad]
             # "left_hip_joint":0.0,
             "left_thigh_joint": 0.0,
@@ -120,9 +109,19 @@ def get_cfgs():
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
         # "termination_if_base_height_greater_than": 0.1,
         # "termination_if_knee_height_greater_than": 0.00,
-        "termination_if_base_connect_plane_than": True, #base触地重置
+        "termination_if_base_connect_plane_than": True, #触地重置
+        "connect_plane_links":[ #触地重置link
+            "base_link",
+            "left_calf_link",
+            # "left_thigh_link",
+            "right_calf_link",
+            # "right_thigh_link",
+                ],
         # base pose
-        "base_init_pos": [0.0, 0.0, 0.15],
+        "base_init_pos":{
+            "urdf":[0.0, 0.0, 0.22],#稍微高一点点
+            "mjcf":[0.0, 0.0, 0.285],
+            },
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
         "episode_length_s": 30.0,
         "resampling_time_s": 4.0,
@@ -141,7 +140,6 @@ def get_cfgs():
             "ang_vel": 0.5,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
-            # "dof_acc": 0.0025,
             "height_measurements": 5.0,
         },
     }
@@ -149,35 +147,35 @@ def get_cfgs():
     reward_cfg = {
         "tracking_lin_sigma": 0.25, 
         "tracking_ang_sigma": 0.25, 
-        "tracking_height_sigma": 0.005,
-        "tracking_similar_legged_sigma": 0.05,   
-        "tracking_gravity_sigma": 0.01,
+        "tracking_height_sigma": 0.01,
+        "tracking_similar_legged_sigma": 0.1,
+        "tracking_gravity_sigma": 0.02,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
             "tracking_base_height": 2.5,    #和similar_legged对抗，similar_legged先提升会促进此项
-            "lin_vel_z": -0.5, #大了影响高度变换速度
+            "lin_vel_z": -0.008, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
-            "projected_gravity": 6.0,
-            "similar_legged": 1.0,  #tracking_base_height和knee_height对抗
+            "projected_gravity": 5.0,
+            "similar_legged": 0.9,  #tracking_base_height和knee_height对抗
             "dof_vel": -2.5e-7,
             "dof_acc": -1.25e-9,
             "dof_force": -0.0006,
-            "knee_height": -0.6,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
+            "knee_height": -0.4,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.005,
             "collision": -0.01,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
-            "terrain":0.0,
+            "terrain":0.6,
         },
     }
     command_cfg = {
         "num_commands": 4,
-        "base_range": 0.3,
+        "base_range": 0.3,  #基础范围
         "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
-        "height_target_range": [0.22 , 0.32],
+        "ang_vel_range": [-6.28, 6.28],   #修改范围要调整奖励权重
+        "height_target_range": [0.16 , 0.32],   #lower会导致跪地
     }
     # 课程学习，奖励循序渐进 待优化
     curriculum_cfg = {
@@ -188,14 +186,15 @@ def get_cfgs():
         },
         "curriculum_lin_vel_step":0.05,   #百分比
         "curriculum_ang_vel_step":0.01,   #百分比
+        "curriculum_height_target_step":0.03,   #高度，先高再低，base_range表示[min+0.7height_range,max]
         "curriculum_lin_vel_min_range":0.3,   #百分比
         "curriculum_ang_vel_min_range":0.15,   #百分比
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
         "friction_ratio_range":[0.8 , 1.2],
-        "random_mass_shift":0.2,
-        "random_com_shift":0.05,
+        "random_mass_shift":0.8,
+        "random_com_shift":0.2,
         "random_KP":[0.9, 1.1], #none v0.0.6
         "random_KD":[0.9, 1.1], #none v0.0.6
         "dof_damping_range":[0.0 , 0.0], # none v0.0.6
@@ -203,7 +202,7 @@ def get_cfgs():
     }
     #地形配置
     terrain_cfg = {
-        "terrain":False, #是否开启地形
+        "terrain":True, #是否开启地形
         "train":"agent_train_gym",
         "eval":"agent_eval_gym",    # agent_eval_gym/circular
         "num_respawn_points":3,
@@ -214,10 +213,8 @@ def get_cfgs():
         ],
         "horizontal_scale":0.1,
         "vertical_scale":0.001,
-        "test_terrain":"",
     }
     return env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg
-
 
 def main():
     parser = argparse.ArgumentParser()

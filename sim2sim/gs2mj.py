@@ -9,21 +9,15 @@ import pickle
 import numpy as np
 
 # 加载 mujoco 模型
-m = mujoco.MjModel.from_xml_path('sim2sim/scence.xml')
+m = mujoco.MjModel.from_xml_path('./scence.xml')
 d = mujoco.MjData(m)
 
-# 获取当前脚本所在的目录（sim2sim）
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# 获取父级目录
-parent_dir = os.path.dirname(current_dir)
-
-# 将 parent_dir 添加到 sys.path，这样就能访问到 logs 和 utils 目录中的文件
-sys.path.append(parent_dir)
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+# 将 utils 文件夹路径添加到 sys.path
+sys.path.append(utils_path)
 
 # 导入 utils 中的 gamepad 模块
-from utils import gamepad
-
+import gamepad
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -48,7 +42,7 @@ def world2self(quat, v):
     result = a - b + c
     return result.to(device)
 
-def get_obs(env_cfg, obs_scales, actions, commands=[0.0, 0.0, 0.0, 0.22]):
+def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0.0, 0.22]):
     commands_scale = torch.tensor(
         [obs_scales["lin_vel"], obs_scales["lin_vel"], 
          obs_scales["ang_vel"], obs_scales["height_measurements"]], device=device, dtype=torch.float32)
@@ -56,7 +50,7 @@ def get_obs(env_cfg, obs_scales, actions, commands=[0.0, 0.0, 0.0, 0.22]):
     gravity = [0.0, 0.0, -1.0]
     projected_gravity = world2self(base_quat,torch.tensor(gravity, device=device, dtype=torch.float32))
     base_lin_vel = world2self(base_quat,get_sensor_data("base_lin_vel"))
-    base_ang_vel = world2self(base_quat,get_sensor_data("base_ang_vel"))
+    base_ang_vel = get_sensor_data("base_ang_vel")
     dof_pos = torch.zeros(env_cfg["num_actions"], device=device, dtype=torch.float32)
     for i, dof_name in enumerate(env_cfg["dof_names"]):
         dof_pos[i] = get_sensor_data(dof_name+"_p")
@@ -67,11 +61,6 @@ def get_obs(env_cfg, obs_scales, actions, commands=[0.0, 0.0, 0.0, 0.22]):
         dof_vel[i] = get_sensor_data(dof_name+"_v")
     
     cmds = torch.tensor(commands, device=device, dtype=torch.float32)
-    
-    default_dof_pos = torch.tensor(
-            [env_cfg["default_joint_angles"][name] for name in env_cfg["dof_names"]],
-            device=device,
-            dtype=torch.float32)
 
     return torch.cat(
         [
@@ -93,7 +82,7 @@ def main():
     args = parser.parse_args()
 
     # 拼接到 logs 文件夹的路径
-    log_dir = os.path.join(parent_dir, 'logs', args.exp_name)
+    log_dir = os.path.join('../logs', args.exp_name)
     cfg_path = os.path.join(log_dir, 'cfgs.pkl')
 
     # 读取配置文件
@@ -122,12 +111,17 @@ def main():
     history_obs_buf = torch.zeros((obs_cfg["history_length"], obs_cfg["num_slice_obs"]), device=device, dtype=torch.float32)
     slice_obs_buf = torch.zeros(obs_cfg["num_slice_obs"], device=device, dtype=torch.float32)
     obs_buf = torch.zeros((obs_cfg["num_obs"]), device=device, dtype=torch.float32)
+    default_dof_pos = torch.tensor(
+        [env_cfg["default_joint_angles"][name] for name in env_cfg["dof_names"]],
+        device=device,
+        dtype=torch.float32)
 
     # 启动 mujoco 渲染
     with mujoco.viewer.launch_passive(m, d) as viewer:
         while viewer.is_running():
             actions = loaded_policy(obs_buf)
-            slice_obs_buf = get_obs(env_cfg=env_cfg, obs_scales=obs_cfg["obs_scales"], actions=actions, commands=commands)
+            slice_obs_buf = get_obs(env_cfg=env_cfg, obs_scales=obs_cfg["obs_scales"],
+                                    actions=actions, default_dof_pos=default_dof_pos, commands=commands)
             slice_obs_buf = slice_obs_buf.unsqueeze(0)
             obs_buf = torch.cat([history_obs_buf, slice_obs_buf], dim=0).view(-1)
 
@@ -135,11 +129,14 @@ def main():
             if obs_cfg["history_length"] > 1:
                 history_obs_buf[:-1, :] = history_obs_buf[1:, :].clone()  # 移位操作
             history_obs_buf[-1, :] = slice_obs_buf 
-
+            
             # 更新动作
-            act = actions.detach().cpu().numpy()
-            for i in range(env_cfg["num_actions"]):
-                d.ctrl[i] = act[i]
+            act = torch.clip(actions, -env_cfg["clip_actions"], env_cfg["clip_actions"]).detach().cpu().numpy()
+            for i in range(env_cfg["num_actions"]-2):
+                d.ctrl[i] = act[i] * env_cfg["joint_action_scale"] + default_dof_pos[i]
+            
+            d.ctrl[4] = act[4] * env_cfg["wheel_action_scale"]
+            d.ctrl[5] = act[5] * env_cfg["wheel_action_scale"]
 
             # 获取控制命令
             commands, reset_flag = pad.get_commands()

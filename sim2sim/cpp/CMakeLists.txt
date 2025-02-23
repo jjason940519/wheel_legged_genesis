@@ -22,6 +22,6 @@ find_package(Torch REQUIRED PATHS ${TORCH_FOLDER} NO_DEFAULT_PATH)
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(sim2sim sim2sim.cpp gamepad.cpp)
+add_executable(gs2mj gs2mj.cpp gamepad.cpp)
 
-target_link_libraries(sim2sim "${TORCH_LIBRARIES}" mujoco::mujoco glut GL GLU glfw ${EIGEN3_LIBS} udev)
+target_link_libraries(gs2mj "${TORCH_LIBRARIES}" mujoco::mujoco glut GL GLU glfw ${EIGEN3_LIBS} udev)
