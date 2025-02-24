@@ -353,7 +353,7 @@ int main(int argc, const char **argv) {
   pad.readGamePad();
   //---------------------------固定相机视角-------------------------------
   // 假设我们要跟踪的物体的名称为 "target_body"
-  int target_body_id = mj_name2id(m, mjOBJ_BODY, "urdf2nz");
+  int target_body_id = mj_name2id(m, mjOBJ_BODY, "nz");
   if (target_body_id == -1) {
     std::cerr << "Body not found!" << std::endl;
     return -1;

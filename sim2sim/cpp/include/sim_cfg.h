@@ -6,8 +6,8 @@
 class ENV_CFG {
 public:
   int num_actions = 6;
-  int history_length = 2;
-  int num_obs = 87;
+  int history_length = 5;
+  int num_obs = 174;
   int num_slice_obs = 29;
   int num_commands = 4;
   std::vector<float> default_joint_angles;

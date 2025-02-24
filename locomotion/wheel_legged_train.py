@@ -18,7 +18,7 @@ def get_train_cfg(exp_name, max_iterations):
             "entropy_coef": 0.01,
             "gamma": 0.995,
             "lam": 0.95,
-            "learning_rate": 0.001,
+            "learning_rate": 0.0002,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
             "num_mini_batches": 4,
@@ -104,6 +104,7 @@ def get_cfgs():
         # PD
         "kp": 30.0,
         "kd": 1.2,
+        "damping": 1.1,
         # termination 角度制    obs的angv弧度制
         "termination_if_roll_greater_than": 20,  # degree
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
@@ -113,9 +114,9 @@ def get_cfgs():
         "connect_plane_links":[ #触地重置link
             "base_link",
             "left_calf_link",
-            # "left_thigh_link",
+            "left_thigh_link",
             "right_calf_link",
-            # "right_thigh_link",
+            "right_thigh_link",
                 ],
         # base pose
         "base_init_pos":{
@@ -132,9 +133,9 @@ def get_cfgs():
     }
     obs_cfg = {
         # num_obs = num_slice_obs + history_num * num_slice_obs
-        "num_obs": 87, #在rsl-rl中使用的变量为num_obs表示state数量
+        "num_obs": 174, #在rsl-rl中使用的变量为num_obs表示state数量
         "num_slice_obs": 29,
-        "history_length": 2,
+        "history_length": 5,
         "obs_scales": {
             "lin_vel": 2.0,
             "ang_vel": 0.5,
@@ -160,11 +161,11 @@ def get_cfgs():
             "similar_to_default": 0.0,
             "projected_gravity": 5.0,
             "similar_legged": 0.9,  #tracking_base_height和knee_height对抗
-            "dof_vel": -2.5e-7,
-            "dof_acc": -1.25e-9,
-            "dof_force": -0.0006,
+            "dof_vel": -0.05,
+            "dof_acc": -1.0e-9,
+            "dof_force": -0.0004,
             "knee_height": -0.4,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
-            "ang_vel_xy": -0.005,
+            "ang_vel_xy": -0.05,
             "collision": -0.01,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
             "terrain":0.6,
         },
@@ -174,8 +175,8 @@ def get_cfgs():
         "base_range": 0.3,  #基础范围
         "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
-        "ang_vel_range": [-6.28, 6.28],   #修改范围要调整奖励权重
-        "height_target_range": [0.16 , 0.32],   #lower会导致跪地
+        "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
+        "height_target_range": [0.18 , 0.32],   #lower会导致跪地
     }
     # 课程学习，奖励循序渐进 待优化
     curriculum_cfg = {
@@ -186,19 +187,23 @@ def get_cfgs():
         },
         "curriculum_lin_vel_step":0.05,   #百分比
         "curriculum_ang_vel_step":0.01,   #百分比
-        "curriculum_height_target_step":0.03,   #高度，先高再低，base_range表示[min+0.7height_range,max]
+        "curriculum_height_target_step":0.01,   #高度，先高再低，base_range表示[min+0.7height_range,max]
         "curriculum_lin_vel_min_range":0.3,   #百分比
         "curriculum_ang_vel_min_range":0.15,   #百分比
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
         "friction_ratio_range":[0.8 , 1.2],
-        "random_mass_shift":0.8,
-        "random_com_shift":0.2,
-        "random_KP":[0.9, 1.1], #none v0.0.6
-        "random_KD":[0.9, 1.1], #none v0.0.6
-        "dof_damping_range":[0.0 , 0.0], # none v0.0.6
-        "dof_stiffness_range":[0.0 , 0.0], # none v0.0.6
+        "random_base_mass_shift":3.0, #质量偏移量
+        "random_other_mass_shift":0.5,  #质量偏移量
+        "random_base_com_shift":0.05, #位置偏移量 xyz
+        "random_other_com_shift":0.05, #位置偏移量 xyz
+        "random_KP":[0.9, 1.1], #百分比
+        "random_KD":[0.9, 1.1], #百分比
+        "random_default_joint_angles":[-0.03,0.03], #rad
+        "dof_damping_range":[1.0 , 1.3], #范围 genesis bug
+        "dof_stiffness_range":[10.0 , 15.0], #范围
+        "dof_armature_range":[0.0 , 0.5], #额外惯性 类似电机减速器惯性
     }
     #地形配置
     terrain_cfg = {
@@ -207,7 +212,7 @@ def get_cfgs():
         "eval":"agent_eval_gym",    # agent_eval_gym/circular
         "num_respawn_points":3,
         "respawn_points":[
-            [-20.0, -20.0, 0.0],    #plane地形坐标，一定要有，为了远离其他地形
+            [-5.0, -5.0, 0.0],    #plane地形坐标，一定要有，为了远离其他地形
             [5.0, 5.0, 0.0],
             [15.0, 5.0, 0.08],
         ],
@@ -223,7 +228,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.cuda)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()

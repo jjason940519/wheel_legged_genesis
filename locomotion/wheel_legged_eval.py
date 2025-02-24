@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
     
 
-    gs.init(backend=gs.vulkan,logging_level="warning")
+    gs.init(backend=gs.cuda,logging_level="warning")
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
@@ -62,11 +62,11 @@ def main():
         print(f"模型加载失败: {e}")
         exit()
     obs, _ = env.reset()
-    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14,0.01])
+    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14,0.005])
     with torch.no_grad():
         while True:
-            # actions = policy(obs)
-            actions = loaded_policy(obs)
+            actions = policy(obs)
+            # actions = loaded_policy(obs)
             obs, _, rews, dones, infos = env.step(actions)
             comands,reset_flag = pad.get_commands()
             env.set_commands(0,comands)
