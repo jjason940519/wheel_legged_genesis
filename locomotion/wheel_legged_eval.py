@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
     
 
-    gs.init(backend=gs.vulkan,logging_level="warning")
+    gs.init(backend=gs.gpu,logging_level="warning")
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
@@ -39,7 +39,7 @@ def main():
         curriculum_cfg=curriculum_cfg,
         domain_rand_cfg=domain_rand_cfg,
         terrain_cfg=terrain_cfg,
-        robot_morphs="urdf",
+        robot_morphs="mjcf",
         show_viewer=True,
         train_mode=False
     )

@@ -148,6 +148,12 @@ class WheelLeggedEnv:
         # damping = np.full((self.num_envs, self.num_actions), self.env_cfg["damping"])
         # self.robot.set_dofs_damping(damping=damping, 
         #                            dofs_idx_local=np.arange(0, self.num_actions),)
+        # stiffness = np.full((self.num_envs, self.robot.n_dofs), self.env_cfg["stiffness"])
+        # self.robot.set_dofs_stiffness(stiffness=stiffness, 
+        #                            dofs_idx_local=np.arange(0, self.robot.n_dofs))
+        armature = np.full((self.num_envs, self.robot.n_dofs), self.env_cfg["armature"])
+        self.robot.set_dofs_armature(armature=armature, 
+                                   dofs_idx_local=np.arange(0, self.robot.n_dofs))
 
         #dof limits
         lower = [self.env_cfg["dof_limit"][name][0] for name in self.env_cfg["dof_names"]]
@@ -494,10 +500,11 @@ class WheelLeggedEnv:
         #                            dofs_idx_local=np.arange(7, self.robot.n_dofs), 
         #                            envs_idx=envs_idx)
         
-        stiffness = self.dof_stiffness_low+self.dof_stiffness_range * torch.rand(len(envs_idx), self.robot.n_dofs)
-        self.robot.set_dofs_stiffness(stiffness=stiffness, 
-                                   dofs_idx_local=np.arange(0, self.robot.n_dofs), 
-                                   envs_idx=envs_idx)
+        # genesis bug
+        # stiffness = self.dof_stiffness_low+self.dof_stiffness_range * torch.rand(len(envs_idx), self.robot.n_dofs)
+        # self.robot.set_dofs_stiffness(stiffness=stiffness, 
+        #                            dofs_idx_local=np.arange(0, self.robot.n_dofs), 
+        #                            envs_idx=envs_idx)
         armature = self.dof_armature_low+self.dof_armature_range * torch.rand(len(envs_idx), self.robot.n_dofs)
         self.robot.set_dofs_armature(armature=armature, 
                                    dofs_idx_local=np.arange(0, self.robot.n_dofs), 
@@ -523,7 +530,7 @@ class WheelLeggedEnv:
         # 调整线速度
         lin_min_range, lin_max_range = self.adjust_scale(
             self.lin_vel_error, 
-            0.15,   #误差反馈更新
+            0.1,   #误差反馈更新
             0.2,    #err back update
             self.curriculum_lin_vel_scale, 
             self.curriculum_cfg["curriculum_lin_vel_step"], 
@@ -535,8 +542,8 @@ class WheelLeggedEnv:
         # 调整角速度    角速度误差可以大一些，因为comand范围更大
         ang_min_range, ang_max_range = self.adjust_scale(
             self.ang_vel_error, 
-            0.45,
-            0.65,
+            0.2,
+            0.35,
             self.curriculum_ang_vel_scale, 
             self.curriculum_cfg["curriculum_ang_vel_step"], 
             self.curriculum_cfg["curriculum_ang_vel_min_range"], 

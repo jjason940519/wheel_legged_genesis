@@ -59,7 +59,7 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
     dof_vel = torch.zeros(env_cfg["num_actions"], device=device, dtype=torch.float32)
     for i, dof_name in enumerate(env_cfg["dof_names"]):
         dof_vel[i] = get_sensor_data(dof_name+"_v")
-    
+
     cmds = torch.tensor(commands, device=device, dtype=torch.float32)
 
     return torch.cat(
@@ -129,12 +129,13 @@ def main():
             if obs_cfg["history_length"] > 1:
                 history_obs_buf[:-1, :] = history_obs_buf[1:, :].clone()  # 移位操作
             history_obs_buf[-1, :] = slice_obs_buf 
-            
+
             # 更新动作
             act = torch.clip(actions, -env_cfg["clip_actions"], env_cfg["clip_actions"]).detach().cpu().numpy()
+            print("act:", act)
             for i in range(env_cfg["num_actions"]-2):
                 d.ctrl[i] = act[i] * env_cfg["joint_action_scale"] + default_dof_pos[i]
-            
+
             d.ctrl[4] = act[4] * env_cfg["wheel_action_scale"]
             d.ctrl[5] = act[5] * env_cfg["wheel_action_scale"]
 
@@ -149,10 +150,11 @@ def main():
                 mujoco.mj_step(m, d)
             # 更新渲染
             viewer.sync()
-            # 同步时间
-            time_until_next_step = m.opt.timestep - (time.time() - step_start)
-            if time_until_next_step > 0:
-                time.sleep(time_until_next_step)
+            time.sleep(0.016)
+            # # 同步时间
+            # time_until_next_step = m.opt.timestep - (time.time() - step_start)
+            # if time_until_next_step > 0:
+            #     time.sleep(time_until_next_step)
 
 if __name__ == "__main__":
     main()

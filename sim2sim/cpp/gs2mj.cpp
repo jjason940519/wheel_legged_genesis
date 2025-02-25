@@ -192,12 +192,12 @@ void compute_ctrl(std::vector<float> act) {
   actions[5] = act[5] * action_cfg.wheel_action_scale;
   // 裁减
   for (int i = 0; i < env_cfg.min_joint_angles.size(); i++) {
-    if (act[i] < env_cfg.min_joint_angles[i])
-      act[i] = env_cfg.min_joint_angles[i];
+    if (actions[i] < env_cfg.min_joint_angles[i])
+      actions[i] = env_cfg.min_joint_angles[i];
   }
   for (int i = 0; i < env_cfg.max_joint_angles.size(); i++) {
-    if (act[i] > env_cfg.max_joint_angles[i])
-      act[i] = env_cfg.max_joint_angles[i];
+    if (actions[i] > env_cfg.max_joint_angles[i])
+      actions[i] = env_cfg.max_joint_angles[i];
   }
 }
 

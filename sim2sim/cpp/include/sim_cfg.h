@@ -16,8 +16,8 @@ public:
   std::vector<std::string> dof_names;
   ENV_CFG()
       : default_joint_angles({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-        min_joint_angles({-1.0472,0,-1.0472,0}),
-        max_joint_angles({0.5236,1.3963,0.5236,1.3963}), dof_names({"left_thigh_joint", "left_calf_joint", "right_thigh_joint",
+        min_joint_angles({-1.0472,0,-1.0472,0,-100,-100}),
+        max_joint_angles({0.5236,1.3963,0.5236,1.3963,100,100}), dof_names({"left_thigh_joint", "left_calf_joint", "right_thigh_joint",
                    "right_calf_joint", "left_wheel_joint",
                    "right_wheel_joint"}) {}
 };

@@ -105,6 +105,8 @@ def get_cfgs():
         "kp": 30.0,
         "kd": 1.2,
         "damping": 1.1,
+        "stiffness":11.0,
+        "armature":0.25,
         # termination 角度制    obs的angv弧度制
         "termination_if_roll_greater_than": 20,  # degree
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
@@ -135,9 +137,9 @@ def get_cfgs():
     }
     obs_cfg = {
         # num_obs = num_slice_obs + history_num * num_slice_obs
-        "num_obs": 290, #在rsl-rl中使用的变量为num_obs表示state数量
+        "num_obs": 174, #在rsl-rl中使用的变量为num_obs表示state数量
         "num_slice_obs": 29,
-        "history_length": 9,
+        "history_length": 5,
         "obs_scales": {
             "lin_vel": 2.0,
             "ang_vel": 0.5,
@@ -148,25 +150,25 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.2, 
-        "tracking_ang_sigma": 0.25, 
-        "tracking_height_sigma": 0.002,
+        "tracking_lin_sigma": 0.15, 
+        "tracking_ang_sigma": 0.15, 
+        "tracking_height_sigma": 0.001,
         "tracking_similar_legged_sigma": 0.1,
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 2.0,    #和similar_legged对抗，similar_legged先提升会促进此项
+            "tracking_base_height": 1.5,    #和similar_legged对抗，similar_legged先提升会促进此项
             "lin_vel_z": -1.0, #大了影响高度变换速度
-            "joint_action_rate": -0.02,
+            "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
             "projected_gravity": 5.0,
-            "similar_legged": 0.9,  #tracking_base_height和knee_height对抗
+            "similar_legged": 0.7,  #tracking_base_height和knee_height对抗
             "dof_vel": -0.05,
             "dof_acc": -0.5e-9,
-            "dof_force": -0.0004,
-            "knee_height": -0.0,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
+            "dof_force": -0.0001,
+            "knee_height": -0.3,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.02,
             "collision": -0.001,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
             "terrain":0.6,
@@ -178,7 +180,7 @@ def get_cfgs():
         "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
-        "height_target_range": [0.18 , 0.32],   #lower会导致跪地
+        "height_target_range": [0.2 , 0.32],   #lower会导致跪地
     }
     # 课程学习，奖励循序渐进 待优化
     curriculum_cfg = {
@@ -188,8 +190,8 @@ def get_cfgs():
             "similar_legged", 
         },
         "curriculum_lin_vel_step":0.05,   #百分比
-        "curriculum_ang_vel_step":0.01,   #百分比
-        "curriculum_height_target_step":0.01,   #高度，先高再低，base_range表示[min+0.7height_range,max]
+        "curriculum_ang_vel_step":0.05,   #百分比
+        "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
         "curriculum_lin_vel_min_range":0.3,   #百分比
         "curriculum_ang_vel_min_range":0.15,   #百分比
     }
@@ -197,14 +199,14 @@ def get_cfgs():
     domain_rand_cfg = { 
         "friction_ratio_range":[0.8 , 1.2],
         "random_base_mass_shift":2.0, #质量偏移量
-        "random_other_mass_shift":0.5,  #质量偏移量
+        "random_other_mass_shift":0.1,  #质量偏移量
         "random_base_com_shift":0.05, #位置偏移量 xyz
-        "random_other_com_shift":0.05, #位置偏移量 xyz
+        "random_other_com_shift":0.01, #位置偏移量 xyz
         "random_KP":[0.9, 1.1], #百分比
         "random_KD":[0.9, 1.1], #百分比
         "random_default_joint_angles":[-0.03,0.03], #rad
         "dof_damping_range":[1.0 , 1.3], #范围 genesis bug
-        "dof_stiffness_range":[10.0 , 12.0], #范围
+        "dof_stiffness_range":[10.0 , 12.0], #范围 genesis bug
         "dof_armature_range":[0.0 , 0.5], #额外惯性 类似电机减速器惯性
     }
     #地形配置
@@ -226,11 +228,11 @@ def get_cfgs():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("-B", "--num_envs", type=int, default=4096)
+    parser.add_argument("-B", "--num_envs", type=int, default=8192)
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()
