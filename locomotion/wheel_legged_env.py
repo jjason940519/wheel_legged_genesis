@@ -523,7 +523,7 @@ class WheelLeggedEnv:
         # 调整线速度
         lin_min_range, lin_max_range = self.adjust_scale(
             self.lin_vel_error, 
-            0.05,   #误差反馈更新
+            0.15,   #误差反馈更新
             0.2,    #err back update
             self.curriculum_lin_vel_scale, 
             self.curriculum_cfg["curriculum_lin_vel_step"], 
@@ -657,11 +657,11 @@ class WheelLeggedEnv:
 
     def _reward_dof_acc(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square((self.dof_vel - self.last_dof_vel)/self.dt))
+        return torch.sum(torch.square((self.dof_vel[:, :4] - self.last_dof_vel[:, :4])/self.dt))
 
     def _reward_dof_force(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square(self.dof_force[:, :4]), dim=1)
+        return torch.sum(torch.square(self.dof_force), dim=1)
 
     def _reward_ang_vel_xy(self):
         # Penalize xy axes base angular velocity
@@ -669,7 +669,10 @@ class WheelLeggedEnv:
 
     def _reward_collision(self):
         # 接触地面惩罚 力越大惩罚越大
-        return torch.square(self.connect_force[:,0,:]).sum(dim=1)
+        collision = torch.zeros(self.num_envs,device=self.device,dtype=gs.tc_float)
+        for idx in self.reset_links:
+            collision += torch.square(self.connect_force[:,idx,:]).sum(dim=1)
+        return collision
 
     def _reward_terrain(self):
         extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
