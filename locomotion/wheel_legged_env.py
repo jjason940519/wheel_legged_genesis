@@ -145,15 +145,19 @@ class WheelLeggedEnv:
         self.robot.set_dofs_kp(kp, self.motor_dofs)
         self.robot.set_dofs_kv(kd, self.motor_dofs)
         
-        # damping = np.full((self.num_envs, self.num_actions), self.env_cfg["damping"])
-        # self.robot.set_dofs_damping(damping=damping, 
-        #                            dofs_idx_local=np.arange(0, self.num_actions),)
+        # from IPython import embed; embed()
+        damping = np.full((self.num_envs, self.robot.n_dofs), self.env_cfg["damping"])
+        damping[:,:6] = 0
+        self.robot.set_dofs_damping(damping=damping, 
+                                   dofs_idx_local=np.arange(0,self.robot.n_dofs))
         # stiffness = np.full((self.num_envs, self.robot.n_dofs), self.env_cfg["stiffness"])
+        # stiffness[:,:7] = 0
         # self.robot.set_dofs_stiffness(stiffness=stiffness, 
+        #                            dofs_idx_local=np.arange(0,self.robot.n_dofs))
+        # armature = np.full((self.num_envs, self.robot.n_dofs), self.env_cfg["armature"])
+        # armature[:,:6] = 0
+        # self.robot.set_dofs_armature(armature=armature, 
         #                            dofs_idx_local=np.arange(0, self.robot.n_dofs))
-        armature = np.full((self.num_envs, self.robot.n_dofs), self.env_cfg["armature"])
-        self.robot.set_dofs_armature(armature=armature, 
-                                   dofs_idx_local=np.arange(0, self.robot.n_dofs))
 
         #dof limits
         lower = [self.env_cfg["dof_limit"][name][0] for name in self.env_cfg["dof_names"]]
@@ -265,7 +269,7 @@ class WheelLeggedEnv:
         #地形训练索引
         self.terrain_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         # print("self.obs_buf.size(): ",self.obs_buf.size())
-
+        
     def _resample_commands(self, envs_idx):
         for idx in envs_idx:
             for command_idx in range(self.num_commands):
@@ -494,21 +498,23 @@ class WheelLeggedEnv:
         dof_pos_shift = self.joint_angle_low + self.joint_angle_range * torch.rand(len(envs_idx),self.num_actions,device=self.device,dtype=gs.tc_float)
         self.default_dof_pos[envs_idx] = dof_pos_shift + self.basic_default_dof_pos
 
-        # genesis bug
-        # damping = self.dof_damping_low+self.dof_damping_range * torch.rand(len(envs_idx), self.robot.n_dofs-7)
-        # self.robot.set_dofs_damping(damping=damping, 
-        #                            dofs_idx_local=np.arange(7, self.robot.n_dofs), 
-        #                            envs_idx=envs_idx)
-        
-        # genesis bug
-        # stiffness = self.dof_stiffness_low+self.dof_stiffness_range * torch.rand(len(envs_idx), self.robot.n_dofs)
-        # self.robot.set_dofs_stiffness(stiffness=stiffness, 
-        #                            dofs_idx_local=np.arange(0, self.robot.n_dofs), 
-        #                            envs_idx=envs_idx)
-        armature = self.dof_armature_low+self.dof_armature_range * torch.rand(len(envs_idx), self.robot.n_dofs)
-        self.robot.set_dofs_armature(armature=armature, 
+        damping = self.dof_damping_low+self.dof_damping_range * torch.rand(len(envs_idx), self.robot.n_dofs)
+        damping[:,:6] = 0
+        self.robot.set_dofs_damping(damping=damping, 
                                    dofs_idx_local=np.arange(0, self.robot.n_dofs), 
                                    envs_idx=envs_idx)
+
+        # stiffness = self.dof_stiffness_low+self.dof_stiffness_range * torch.rand(len(envs_idx), self.robot.n_dofs)
+        # stiffness[:,:6] = 0
+        # self.robot.set_dofs_stiffness(stiffness=stiffness, 
+        #                            dofs_idx_local=np.arange(6, self.robot.n_dofs - 6), 
+        #                            envs_idx=envs_idx)
+        
+        # armature = self.dof_armature_low+self.dof_armature_range * torch.rand(len(envs_idx), self.robot.n_dofs)
+        # armature[:,:6] = 0
+        # self.robot.set_dofs_armature(armature=armature, 
+        #                            dofs_idx_local=np.arange(6, self.robot.n_dofs - 6), 
+        #                            envs_idx=envs_idx)
 
     def adjust_scale(self, error,lower_err,upper_err, scale, scale_step, min_range, range_cfg):
         # 计算误差范围
@@ -543,7 +549,7 @@ class WheelLeggedEnv:
         ang_min_range, ang_max_range = self.adjust_scale(
             self.ang_vel_error, 
             0.2,
-            0.35,
+            0.3,
             self.curriculum_ang_vel_scale, 
             self.curriculum_cfg["curriculum_ang_vel_step"], 
             self.curriculum_cfg["curriculum_ang_vel_min_range"], 

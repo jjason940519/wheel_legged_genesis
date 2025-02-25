@@ -104,7 +104,7 @@ def get_cfgs():
         # PD
         "kp": 30.0,
         "kd": 1.2,
-        "damping": 1.1,
+        "damping": 1.2,
         "stiffness":11.0,
         "armature":0.25,
         # termination 角度制    obs的angv弧度制
@@ -159,7 +159,7 @@ def get_cfgs():
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
             "tracking_base_height": 1.5,    #和similar_legged对抗，similar_legged先提升会促进此项
-            "lin_vel_z": -1.0, #大了影响高度变换速度
+            "lin_vel_z": -0.2, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
@@ -205,8 +205,8 @@ def get_cfgs():
         "random_KP":[0.9, 1.1], #百分比
         "random_KD":[0.9, 1.1], #百分比
         "random_default_joint_angles":[-0.03,0.03], #rad
-        "dof_damping_range":[1.0 , 1.3], #范围 genesis bug
-        "dof_stiffness_range":[10.0 , 12.0], #范围 genesis bug
+        "dof_damping_range":[1.0 , 1.3], #范围
+        "dof_stiffness_range":[10.0 , 12.0], #范围
         "dof_armature_range":[0.0 , 0.5], #额外惯性 类似电机减速器惯性
     }
     #地形配置
@@ -232,7 +232,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.gpu)
+    gs.init(logging_level="warning",backend=gs.vulkan)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()
