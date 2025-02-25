@@ -147,7 +147,7 @@
           <geom type="mesh" mesh="LeftThighBearing" material="metal" mass="0.13" class="collision" />
 
           <!-- 连杆 -->
-          <!-- <body name="left_thigh_pitman1" pos="0 0.0165 0">
+          <body name="left_thigh_pitman1" pos="0 0.0165 0">
             <joint type="hinge" axis="0 1 0" />
             <geom type="mesh" mesh="LeftThighPitman1" material="fiberglass" mass="0.022"
               class="collision" />
@@ -158,7 +158,7 @@
               <geom type="mesh" mesh="LeftThighPitman2" material="metal"
                 mass="0.15" class="collision" />
             </body>
-          </body> -->
+          </body>
 
           <!-- 小腿 -->
           <body name="left_calf" pos="-0.0015 0.019 -0.17999" euler="0 -1.5707963267948966192313216 0">
@@ -180,7 +180,7 @@
             </body>
 
             <!-- 全向轮 -->
-            <!-- <body euler="1.57 0 0" pos="-0.03657 0.0178 0.03409">
+            <body euler="1.57 0 0" pos="-0.03657 0.0178 0.03409">
               <joint type="hinge" axis="0 0 1" frictionloss="0.005" />
               <site type="cylinder" size="0.030 0.005" rgba=".2 .2 .2 .7" />
               <geom type="cylinder" size="0.015 0.005" rgba=".2 .2 .2 .7" mass="0.008"
@@ -197,7 +197,7 @@
                     class="collision" />
                 </body>
               </replicate>
-            </body> -->
+            </body>
 
           </body>
         </body>
@@ -222,7 +222,7 @@
           <geom type="mesh" mesh="RightThighBearing" material="metal" mass="0.13" class="collision" />
 
           <!-- 连杆 -->
-          <!-- <body name="right_thigh_pitman1" pos="0 -0.0165 0">
+          <body name="right_thigh_pitman1" pos="0 -0.0165 0">
             <joint type="hinge" axis="0 1 0" />
             <geom type="mesh" mesh="RightThighPitman1" material="fiberglass" mass="0.022"
               class="collision" />
@@ -232,7 +232,7 @@
                 rgba="0 1 0 1" />
               <geom type="mesh" mesh="RightThighPitman2" material="metal" mass="0.15" class="collision" />
             </body>
-          </body> -->
+          </body>
 
           <!-- 小腿 -->
           <body name="right_calf" pos="-0.00248 -0.019 -0.17998" euler="0 -1.5707963267948966192313216 0">
@@ -254,7 +254,7 @@
             </body>
 
             <!-- 全向轮 -->
-            <!-- <body euler="1.57 0 0" pos="-0.03657 -0.0178 0.03409">
+            <body euler="1.57 0 0" pos="-0.03657 -0.0178 0.03409">
               <joint type="hinge" axis="0 0 1" frictionloss="0.005" />
               <site type="cylinder" size="0.030 0.005" rgba=".2 .2 .2 .7" />
               <geom type="cylinder" size="0.015 0.005" rgba=".2 .2 .2 .7" mass="0.008"
@@ -271,7 +271,7 @@
                     class="collision" />
                 </body>
               </replicate>
-            </body> -->
+            </body>
 
           </body>
         </body>
@@ -279,10 +279,10 @@
     </body>
   </worldbody>
 
-  <!-- <equality>
+  <equality>
     <connect site1="left_pitman_site1" site2="left_pitman_site2" />
     <connect site1="right_pitman_site1" site2="right_pitman_site2" />
-  </equality> -->
+  </equality>
 
   <actuator>
     <!-- <position joint="left_hip_joint" name="left_hip_joint" kp="80" kv="2" ctrlrange="-0.31416 0.31416"/> -->

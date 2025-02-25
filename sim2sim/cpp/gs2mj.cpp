@@ -284,7 +284,7 @@ int main(int argc, const char **argv) {
   mjr_defaultContext(&con);
 
   // create scene and context
-  mjv_makeScene(m, &scn, 2000);
+  mjv_makeScene(m, &scn, 4000);
   mjr_makeContext(m, &con, mjFONTSCALE_150);
 
   // install GLFW mouse and keyboard callbacks
