@@ -19,3 +19,9 @@ ERROR: Shadow framebuffer is not complete, error 0x8cd6
 Tue Feb 25 22:12:25 2025
 ERROR: Shadow framebuffer is not complete, error 0x8cd6
 
+Wed Feb 26 01:07:01 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+
+Wed Feb 26 01:14:06 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+
