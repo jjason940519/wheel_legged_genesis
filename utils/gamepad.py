@@ -86,15 +86,15 @@ class control_gamepad:
                         case pygame.K_e:
                             self.commands[2] = -self.command_scale[2] * quiet_walking
                         case pygame.K_SPACE:
-                            self.commands[3] = +self.command_scale[3] * 20.0
+                            self.commands[3] = +self.command_scale[3] * 100.0
                         case pygame.K_c:
-                            self.commands[3] = -self.command_scale[3] * 20.0
+                            self.commands[3] = -self.command_scale[3] * 100.0
                         case pygame.K_LCTRL:
-                            self.commands[3] = -self.command_scale[3] * 20.0
+                            self.commands[3] = -self.command_scale[3] * 100.0
                         case pygame.K_r:
                             reset_flag=True
                         case pygame.K_LSHIFT:
-                            quiet_walking=0.5
+                            quiet_walking=0.2
                 elif event.type == pygame.KEYUP:  # 键盘按键释放事件
                     match event.key:
                         case pygame.K_w:

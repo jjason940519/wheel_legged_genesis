@@ -1,4 +1,4 @@
-# Install script for directory: /home/albusgive/wheel_legged_genesis/sim2sim/cpp
+# Install script for directory: /home/albusgive2/wheel_legged_genesis/sim2sim/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/albusgive/wheel_legged_genesis/sim2sim/cpp/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

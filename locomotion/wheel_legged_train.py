@@ -104,9 +104,9 @@ def get_cfgs():
         # PD
         "kp": 30.0,
         "kd": 1.2,
-        "damping": 1.2,
-        "stiffness":11.0,
-        "armature":0.25,
+        "damping": 1.0,
+        "stiffness":1.5,
+        "armature":0.1,
         # termination 角度制    obs的angv弧度制
         "termination_if_roll_greater_than": 20,  # degree
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
@@ -150,27 +150,27 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.15, 
-        "tracking_ang_sigma": 0.15, 
+        "tracking_lin_sigma": 0.2, 
+        "tracking_ang_sigma": 0.2, 
         "tracking_height_sigma": 0.001,
         "tracking_similar_legged_sigma": 0.1,
         "tracking_gravity_sigma": 0.01,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 1.5,    #和similar_legged对抗，similar_legged先提升会促进此项
+            "tracking_base_height": 2.5,    #和similar_legged对抗，similar_legged先提升会促进此项
             "lin_vel_z": -0.2, #大了影响高度变换速度
-            "joint_action_rate": -0.005,
+            "joint_action_rate": -0.006,
             "wheel_action_rate": -0.00001,
             "similar_to_default": 0.0,
-            "projected_gravity": 5.0,
+            "projected_gravity": 6.0,
             "similar_legged": 0.7,  #tracking_base_height和knee_height对抗
             "dof_vel": -0.05,
             "dof_acc": -0.5e-9,
             "dof_force": -0.0001,
             "knee_height": -0.3,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.02,
-            "collision": -0.001,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
+            "collision": -0.0008,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
             "terrain":0.6,
         },
     }
@@ -189,11 +189,13 @@ def get_cfgs():
             "projected_gravity",
             "similar_legged", 
         },
-        "curriculum_lin_vel_step":0.05,   #百分比
-        "curriculum_ang_vel_step":0.05,   #百分比
+        "curriculum_lin_vel_step":0.02,   #百分比
+        "curriculum_ang_vel_step":0.005,   #百分比
         "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
         "curriculum_lin_vel_min_range":0.3,   #百分比
         "curriculum_ang_vel_min_range":0.15,   #百分比
+        "lin_vel_err_range":[0.05,0.15],  #课程误差阈值
+        "ang_vel_err_range":[0.1,0.2],  #课程误差阈值
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
@@ -205,9 +207,9 @@ def get_cfgs():
         "random_KP":[0.9, 1.1], #百分比
         "random_KD":[0.9, 1.1], #百分比
         "random_default_joint_angles":[-0.03,0.03], #rad
-        "dof_damping_range":[1.0 , 1.3], #范围
-        "dof_stiffness_range":[10.0 , 12.0], #范围
-        "dof_armature_range":[0.0 , 0.5], #额外惯性 类似电机减速器惯性
+        "dof_damping_range":[0.9 , 1.1], #百分比
+        "dof_stiffness_range":[0.9 , 1.1], #百分比  genesis bug
+        "dof_armature_range":[0.9 , 1.1], #百分比 额外惯性 类似电机减速器惯性
     }
     #地形配置
     terrain_cfg = {
@@ -232,7 +234,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()
