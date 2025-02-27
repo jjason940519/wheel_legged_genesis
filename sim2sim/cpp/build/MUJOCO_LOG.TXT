@@ -1,0 +1,21 @@
+Wed Feb 26 21:40:35 2025
+ERROR: makeDofDofSparse: unexpected remaining
+
+Wed Feb 26 21:40:35 2025
+WARNING: Inertia matrix is too close to singular at DOF 41. Check model. Time = 0.0000.
+
+Wed Feb 26 21:42:08 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+
+Wed Feb 26 21:52:54 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+
+Wed Feb 26 21:59:46 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+
+Thu Feb 27 01:16:43 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+
+Thu Feb 27 01:54:16 2025
+ERROR: mju_makeFrame: xaxis of contact frame undefined
+

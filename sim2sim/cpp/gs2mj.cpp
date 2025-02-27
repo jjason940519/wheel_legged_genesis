@@ -31,6 +31,9 @@
 #include <Eigen/StdVector>
 #include <gamepad.h>
 
+#include <chrono>
+#include <thread>
+
 auto device = torch::kCUDA;
 
 // model input & output
@@ -412,9 +415,10 @@ int main(int argc, const char **argv) {
     cout_vector(actions, "actions", Color::Green);
     // cout_vector(commands, "commands",Color::Red);
 
-    for (int i = 0; i < 4; i++) // timestep 当前设置0.002
+    //同步时间
+    auto step_start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 5; i++) // timestep 当前设置0.002
       mj_step(m, d);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // ---------------------look at ------------------------
     // 获取目标物体的位置和朝向
@@ -448,6 +452,16 @@ int main(int argc, const char **argv) {
     glfwSwapBuffers(window);
     // process pending GUI events, call GLFW callbacks
     glfwPollEvents();
+
+    //同步时间
+    auto current_time = std::chrono::high_resolution_clock::now();
+    double elapsed_sec =
+        std::chrono::duration<double>(current_time - step_start).count();
+    double time_until_next_step = m->opt.timestep - elapsed_sec;
+    if (time_until_next_step > 0.0) {
+      auto sleep_duration = std::chrono::duration<double>(time_until_next_step);
+      std::this_thread::sleep_for(sleep_duration);
+    }
   }
 
   // free visualization storage

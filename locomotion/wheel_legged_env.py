@@ -120,7 +120,7 @@ class WheelLeggedEnv:
                 )
             case "mjcf":
                 self.robot = self.scene.add_entity(
-                    gs.morphs.MJCF(file="assets/mjcf/nz/nz.xml",
+                    gs.morphs.MJCF(file="assets/mjcf/nz/nz_view.xml",
                     pos=base_init_pos),
                     vis_mode='collision'
                 )
@@ -152,7 +152,9 @@ class WheelLeggedEnv:
                                    dofs_idx_local=np.arange(0,self.robot.n_dofs)
                                    )
         stiffness = np.full((self.num_envs,self.robot.n_dofs), self.env_cfg["stiffness"])
-        stiffness[:,self.robot.n_dofs-6:] = 0
+        stiffness[:,:6] = 0
+        stiffness[:,self.motor_dofs[5]] = 0
+        stiffness[:,self.motor_dofs[4]] = 0
         self.robot.set_dofs_stiffness(stiffness=stiffness, 
                                    dofs_idx_local=np.arange(0,self.robot.n_dofs)
                                    )
@@ -510,6 +512,8 @@ class WheelLeggedEnv:
 
         stiffness = (self.dof_stiffness_low+self.dof_stiffness_range * torch.rand(len(envs_idx), self.robot.n_dofs)) * self.env_cfg["stiffness"]
         stiffness[:,self.robot.n_dofs-6:] = 0
+        stiffness[:,self.motor_dofs[5]] = 0
+        stiffness[:,self.motor_dofs[4]] = 0
         self.robot.set_dofs_stiffness(stiffness=stiffness, 
                                    dofs_idx_local=np.arange(0, self.robot.n_dofs), 
                                    envs_idx=envs_idx)

@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
     
 
-    gs.init(backend=gs.gpu,logging_level="warning")
+    gs.init(backend=gs.vulkan,logging_level="warning")
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
@@ -30,6 +30,7 @@ def main():
     terrain_cfg["terrain"] = True
     terrain_cfg["eval"] = "agent_eval_gym" #agent_eval_gym/agent_train_gym/circular
     # env_cfg["kp"] = 40
+    # env_cfg["wheel_action_scale"] = 5
     env = WheelLeggedEnv(
         num_envs=1,
         env_cfg=env_cfg,
@@ -39,7 +40,7 @@ def main():
         curriculum_cfg=curriculum_cfg,
         domain_rand_cfg=domain_rand_cfg,
         terrain_cfg=terrain_cfg,
-        robot_morphs="urdf",
+        robot_morphs="mjcf",
         show_viewer=True,
         train_mode=False
     )
@@ -65,8 +66,8 @@ def main():
     pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14,0.005])
     with torch.no_grad():
         while True:
-            actions = policy(obs)
-            # actions = loaded_policy(obs)
+            # actions = policy(obs)
+            actions = loaded_policy(obs)
             obs, _, rews, dones, infos = env.step(actions)
             comands,reset_flag = pad.get_commands()
             env.set_commands(0,comands)

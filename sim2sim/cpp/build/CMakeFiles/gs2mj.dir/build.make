@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/albusgive2/wheel_legged_genesis/sim2sim/cpp
+CMAKE_SOURCE_DIR = /home/albusgive/wheel_legged_genesis/sim2sim/cpp
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build
+CMAKE_BINARY_DIR = /home/albusgive/wheel_legged_genesis/sim2sim/cpp/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/gs2mj.dir/depend.make
@@ -72,30 +72,30 @@ include CMakeFiles/gs2mj.dir/flags.make
 CMakeFiles/gs2mj.dir/gs2mj.cpp.o: CMakeFiles/gs2mj.dir/flags.make
 CMakeFiles/gs2mj.dir/gs2mj.cpp.o: ../gs2mj.cpp
 CMakeFiles/gs2mj.dir/gs2mj.cpp.o: CMakeFiles/gs2mj.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/gs2mj.dir/gs2mj.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gs2mj.dir/gs2mj.cpp.o -MF CMakeFiles/gs2mj.dir/gs2mj.cpp.o.d -o CMakeFiles/gs2mj.dir/gs2mj.cpp.o -c /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/gs2mj.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/albusgive/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/gs2mj.dir/gs2mj.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gs2mj.dir/gs2mj.cpp.o -MF CMakeFiles/gs2mj.dir/gs2mj.cpp.o.d -o CMakeFiles/gs2mj.dir/gs2mj.cpp.o -c /home/albusgive/wheel_legged_genesis/sim2sim/cpp/gs2mj.cpp
 
 CMakeFiles/gs2mj.dir/gs2mj.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gs2mj.dir/gs2mj.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/gs2mj.cpp > CMakeFiles/gs2mj.dir/gs2mj.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/albusgive/wheel_legged_genesis/sim2sim/cpp/gs2mj.cpp > CMakeFiles/gs2mj.dir/gs2mj.cpp.i
 
 CMakeFiles/gs2mj.dir/gs2mj.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gs2mj.dir/gs2mj.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/gs2mj.cpp -o CMakeFiles/gs2mj.dir/gs2mj.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/albusgive/wheel_legged_genesis/sim2sim/cpp/gs2mj.cpp -o CMakeFiles/gs2mj.dir/gs2mj.cpp.s
 
 CMakeFiles/gs2mj.dir/gamepad.cpp.o: CMakeFiles/gs2mj.dir/flags.make
 CMakeFiles/gs2mj.dir/gamepad.cpp.o: ../gamepad.cpp
 CMakeFiles/gs2mj.dir/gamepad.cpp.o: CMakeFiles/gs2mj.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/gs2mj.dir/gamepad.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gs2mj.dir/gamepad.cpp.o -MF CMakeFiles/gs2mj.dir/gamepad.cpp.o.d -o CMakeFiles/gs2mj.dir/gamepad.cpp.o -c /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/gamepad.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/albusgive/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/gs2mj.dir/gamepad.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gs2mj.dir/gamepad.cpp.o -MF CMakeFiles/gs2mj.dir/gamepad.cpp.o.d -o CMakeFiles/gs2mj.dir/gamepad.cpp.o -c /home/albusgive/wheel_legged_genesis/sim2sim/cpp/gamepad.cpp
 
 CMakeFiles/gs2mj.dir/gamepad.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gs2mj.dir/gamepad.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/gamepad.cpp > CMakeFiles/gs2mj.dir/gamepad.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/albusgive/wheel_legged_genesis/sim2sim/cpp/gamepad.cpp > CMakeFiles/gs2mj.dir/gamepad.cpp.i
 
 CMakeFiles/gs2mj.dir/gamepad.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gs2mj.dir/gamepad.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/gamepad.cpp -o CMakeFiles/gs2mj.dir/gamepad.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/albusgive/wheel_legged_genesis/sim2sim/cpp/gamepad.cpp -o CMakeFiles/gs2mj.dir/gamepad.cpp.s
 
 # Object files for target gs2mj
 gs2mj_OBJECTS = \
@@ -108,18 +108,24 @@ gs2mj_EXTERNAL_OBJECTS =
 gs2mj: CMakeFiles/gs2mj.dir/gs2mj.cpp.o
 gs2mj: CMakeFiles/gs2mj.dir/gamepad.cpp.o
 gs2mj: CMakeFiles/gs2mj.dir/build.make
-gs2mj: /home/albusgive2/libtorch-cxx11-abi-shared-with-deps-2.6.0+cu124/libtorch/lib/libtorch.so
-gs2mj: /home/albusgive2/libtorch-cxx11-abi-shared-with-deps-2.6.0+cu124/libtorch/lib/libc10.so
-gs2mj: /home/albusgive2/libtorch-cxx11-abi-shared-with-deps-2.6.0+cu124/libtorch/lib/libkineto.a
-gs2mj: /usr/local/cuda/lib64/libnvrtc.so
-gs2mj: /home/albusgive2/libtorch-cxx11-abi-shared-with-deps-2.6.0+cu124/libtorch/lib/libc10_cuda.so
-gs2mj: /opt/mujoco/lib/libmujoco.so.3.2.8
-gs2mj: /home/albusgive2/libtorch-cxx11-abi-shared-with-deps-2.6.0+cu124/libtorch/lib/libc10_cuda.so
-gs2mj: /home/albusgive2/libtorch-cxx11-abi-shared-with-deps-2.6.0+cu124/libtorch/lib/libc10.so
-gs2mj: /usr/local/cuda/lib64/libcudart.so
-gs2mj: /usr/local/cuda/lib64/libnvToolsExt.so
+gs2mj: /home/albusgive/libtorch-cxx11-abi-shared-with-deps-2.6.0+rocm6.2.4/libtorch/lib/libtorch.so
+gs2mj: /home/albusgive/libtorch-cxx11-abi-shared-with-deps-2.6.0+rocm6.2.4/libtorch/lib/libc10.so
+gs2mj: /home/albusgive/libtorch-cxx11-abi-shared-with-deps-2.6.0+rocm6.2.4/libtorch/lib/libkineto.a
+gs2mj: /opt/mujoco/lib/libmujoco.so.3.2.7
+gs2mj: /home/albusgive/libtorch-cxx11-abi-shared-with-deps-2.6.0+rocm6.2.4/libtorch/lib/libc10_hip.so
+gs2mj: /home/albusgive/libtorch-cxx11-abi-shared-with-deps-2.6.0+rocm6.2.4/libtorch/lib/libc10.so
+gs2mj: /opt/rocm-6.3.2/lib/libMIOpen.so.1.0.60302
+gs2mj: /opt/rocm/lib/libhiprtc.so.6.3.60302
+gs2mj: /opt/rocm-6.3.2/lib/libhipblas.so.2.3.60302
+gs2mj: /opt/rocm-6.3.2/lib/libhipfft.so.0.1.60302
+gs2mj: /opt/rocm-6.3.2/lib/libhiprand.so.1.1.60302
+gs2mj: /opt/rocm-6.3.2/lib/librocrand.so.1.1.60302
+gs2mj: /opt/rocm-6.3.2/lib/libhipsparse.so.1.1.0.60302
+gs2mj: /opt/rocm-6.3.2/lib/libhipsolver.so.0.3.60302
+gs2mj: /opt/rocm-6.3.2/lib/libhipblaslt.so.0.10.60302
+gs2mj: /opt/rocm/lib/libamdhip64.so.6.3.60302
 gs2mj: CMakeFiles/gs2mj.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable gs2mj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/albusgive/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable gs2mj"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/gs2mj.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -131,6 +137,6 @@ CMakeFiles/gs2mj.dir/clean:
 .PHONY : CMakeFiles/gs2mj.dir/clean
 
 CMakeFiles/gs2mj.dir/depend:
-	cd /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/albusgive2/wheel_legged_genesis/sim2sim/cpp /home/albusgive2/wheel_legged_genesis/sim2sim/cpp /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build /home/albusgive2/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles/gs2mj.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/albusgive/wheel_legged_genesis/sim2sim/cpp/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/albusgive/wheel_legged_genesis/sim2sim/cpp /home/albusgive/wheel_legged_genesis/sim2sim/cpp /home/albusgive/wheel_legged_genesis/sim2sim/cpp/build /home/albusgive/wheel_legged_genesis/sim2sim/cpp/build /home/albusgive/wheel_legged_genesis/sim2sim/cpp/build/CMakeFiles/gs2mj.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/gs2mj.dir/depend
 

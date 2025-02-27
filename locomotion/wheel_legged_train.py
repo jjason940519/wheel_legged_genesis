@@ -104,9 +104,9 @@ def get_cfgs():
         # PD
         "kp": 30.0,
         "kd": 1.2,
-        "damping": 1.0,
-        "stiffness":1.5,
-        "armature":0.1,
+        "damping": 2,
+        "stiffness":1.5, #不包含轮
+        "armature":0.2,
         # termination 角度制    obs的angv弧度制
         "termination_if_roll_greater_than": 20,  # degree
         "termination_if_pitch_greater_than": 20, #15度以内都摆烂，会导致episode太短难以学习
@@ -207,9 +207,9 @@ def get_cfgs():
         "random_KP":[0.9, 1.1], #百分比
         "random_KD":[0.9, 1.1], #百分比
         "random_default_joint_angles":[-0.03,0.03], #rad
-        "dof_damping_range":[0.9 , 1.1], #百分比
-        "dof_stiffness_range":[0.9 , 1.1], #百分比  genesis bug
-        "dof_armature_range":[0.9 , 1.1], #百分比 额外惯性 类似电机减速器惯性
+        "dof_damping_range":[0.5 , 2.0], #百分比
+        "dof_stiffness_range":[0.5 , 2.0], #百分比 
+        "dof_armature_range":[0.5 , 2.0], #百分比 额外惯性 类似电机减速器惯性
     }
     #地形配置
     terrain_cfg = {
@@ -234,7 +234,7 @@ def main():
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.gpu)
+    gs.init(logging_level="warning",backend=gs.vulkan)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()
