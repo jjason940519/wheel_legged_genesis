@@ -216,6 +216,7 @@ std::vector<float> compute_observations(std::vector<float> commands) {
     base_lin_vel[i] *= obs_sacle.lin_vel;
     obs.push_back(base_lin_vel[i]);
   }
+  cout_vector(base_lin_vel, "base_lin_vel", Color::Green);
 
   // num 3
   auto base_ang_vel = get_sensor_data(m, d, "base_ang_vel");
@@ -223,6 +224,7 @@ std::vector<float> compute_observations(std::vector<float> commands) {
     base_ang_vel[i] *= obs_sacle.ang_vel;
     obs.push_back(base_ang_vel[i]);
   }
+  cout_vector(base_ang_vel, "base_ang_vel", Color::Blue);
 
   // 并非加速度计 num 3
   std::vector<float> gravity_vec = {0.0, 0.0, -1.0};
@@ -330,7 +332,7 @@ int main(int argc, const char **argv) {
     }
     if (map.x) {
       mj_resetData(m, d);
-      module = torch::jit::load(model_path.c_str(), device);
+      // module = torch::jit::load(model_path.c_str(), device);
     }
   });
   int is;
@@ -396,7 +398,7 @@ int main(int argc, const char **argv) {
     // std::cout<<output_tensor<<std::endl;
     // cout_vector(slice_obs_buf, "slice_obs_buf",Color::Green);
 
-    // 裁减action
+    // 裁减action 观测和输出前
     output_tensor = torch::clip(output_tensor, -action_cfg.clip_actions,
                                 action_cfg.clip_actions);
     std::vector<float> vec(output_tensor.data_ptr<float>(),
@@ -411,8 +413,8 @@ int main(int argc, const char **argv) {
     for (int i = 0; i < env_cfg.num_actions; i++) {
       d->ctrl[i] = actions[i];
     }
-    cout_vector(commands, "commands", Color::Red);
-    cout_vector(actions, "actions", Color::Green);
+    // cout_vector(commands, "commands", Color::Red);
+    // cout_vector(actions, "actions", Color::Green);
     // cout_vector(commands, "commands",Color::Red);
 
     //同步时间
@@ -457,7 +459,7 @@ int main(int argc, const char **argv) {
     auto current_time = std::chrono::high_resolution_clock::now();
     double elapsed_sec =
         std::chrono::duration<double>(current_time - step_start).count();
-    double time_until_next_step = m->opt.timestep - elapsed_sec;
+    double time_until_next_step = m->opt.timestep*5 - elapsed_sec;
     if (time_until_next_step > 0.0) {
       auto sleep_duration = std::chrono::duration<double>(time_until_next_step);
       std::this_thread::sleep_for(sleep_duration);

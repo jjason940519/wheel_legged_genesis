@@ -187,6 +187,7 @@ class WheelLeggedEnv:
             self.reward_functions[name] = getattr(self, "_reward_" + name)
             self.episode_sums[name] = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
 
+
         # prepare command_ranges lin_vel_x lin_vel_y ang_vel height_target
         self.command_ranges = torch.zeros((self.num_envs, self.num_commands,2),device=self.device,dtype=gs.tc_float)
         self.command_ranges[:,0,0] = self.command_cfg["lin_vel_x_range"][0] * self.command_cfg["base_range"]
@@ -662,6 +663,7 @@ class WheelLeggedEnv:
         # 两侧腿相似 适合使用轮子行走 抑制劈岔，要和_reward_knee_height结合使用
         legged_error = torch.sum(torch.square(self.dof_pos[:,0:2] - self.dof_pos[:,2:4]), dim=1)
         return torch.exp(-legged_error / self.reward_cfg["tracking_similar_legged_sigma"])
+        # return legged_error
 
     def _reward_knee_height(self):
         # 关节处于某个范围惩罚，避免总跪着

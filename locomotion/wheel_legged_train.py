@@ -13,15 +13,15 @@ def get_train_cfg(exp_name, max_iterations):
 
     train_cfg_dict = {
         "algorithm": {
-            "clip_param": 0.2,
-            "desired_kl": 0.01,
+            "clip_param": 0.15,
+            "desired_kl": 0.005,
             "entropy_coef": 0.01,
             "gamma": 0.995,
             "lam": 0.95,
-            "learning_rate": 0.0002,
+            "learning_rate": 0.0001,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
-            "num_mini_batches": 4,
+            "num_mini_batches": 8,
             "schedule": "adaptive",
             "use_clipped_value_loss": True,
             "value_loss_coef": 1.0,
@@ -31,7 +31,7 @@ def get_train_cfg(exp_name, max_iterations):
             "activation": "elu",
             "actor_hidden_dims": [512, 256, 128, 64],
             "critic_hidden_dims": [256, 128, 64],
-            "init_noise_std": 1.0,
+            "init_noise_std": 5.0,
         },
         "runner": {
             "algorithm_class_name": "PPO",
@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 24,    #每轮仿真多少step
+            "num_steps_per_env": 48,    #每轮仿真多少step
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -150,18 +150,18 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.2, 
-        "tracking_ang_sigma": 0.2, 
-        "tracking_height_sigma": 0.001,
+        "tracking_lin_sigma": 0.25, 
+        "tracking_ang_sigma": 0.25, 
+        "tracking_height_sigma": 0.003,
         "tracking_similar_legged_sigma": 0.1,
-        "tracking_gravity_sigma": 0.01,
+        "tracking_gravity_sigma": 0.02,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 1.0,
-            "tracking_base_height": 2.5,    #和similar_legged对抗，similar_legged先提升会促进此项
+            "tracking_base_height": 2.0,    #和similar_legged对抗，similar_legged先提升会促进此项
             "lin_vel_z": -0.2, #大了影响高度变换速度
             "joint_action_rate": -0.006,
-            "wheel_action_rate": -0.00001,
+            "wheel_action_rate": -0.0002,
             "similar_to_default": 0.0,
             "projected_gravity": 6.0,
             "similar_legged": 0.7,  #tracking_base_height和knee_height对抗
@@ -189,13 +189,13 @@ def get_cfgs():
             "projected_gravity",
             "similar_legged", 
         },
-        "curriculum_lin_vel_step":0.02,   #百分比
-        "curriculum_ang_vel_step":0.005,   #百分比
+        "curriculum_lin_vel_step":0.04,   #比例
+        "curriculum_ang_vel_step":0.08,   #比例
         "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
-        "curriculum_lin_vel_min_range":0.3,   #百分比
-        "curriculum_ang_vel_min_range":0.15,   #百分比
+        "curriculum_lin_vel_min_range":0.3,   #比例
+        "curriculum_ang_vel_min_range":0.15,   #比例
         "lin_vel_err_range":[0.05,0.15],  #课程误差阈值
-        "ang_vel_err_range":[0.1,0.2],  #课程误差阈值
+        "ang_vel_err_range":[0.3,0.4],  #课程误差阈值 连续曲线>方波>不波动
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
@@ -204,12 +204,12 @@ def get_cfgs():
         "random_other_mass_shift":0.1,  #质量偏移量
         "random_base_com_shift":0.05, #位置偏移量 xyz
         "random_other_com_shift":0.01, #位置偏移量 xyz
-        "random_KP":[0.9, 1.1], #百分比
-        "random_KD":[0.9, 1.1], #百分比
-        "random_default_joint_angles":[-0.03,0.03], #rad
-        "dof_damping_range":[0.5 , 2.0], #百分比
-        "dof_stiffness_range":[0.5 , 2.0], #百分比 
-        "dof_armature_range":[0.5 , 2.0], #百分比 额外惯性 类似电机减速器惯性
+        "random_KP":[0.9, 1.1], #比例
+        "random_KD":[0.9, 1.1], #比例
+        "random_default_joint_angles":[-0.05,0.05], #rad
+        "dof_damping_range":[0.8 , 1.2], #比例
+        "dof_stiffness_range":[0.8 , 1.2], #比例 
+        "dof_armature_range":[0.8 , 1.2], #比例 额外惯性 类似电机减速器惯性
     }
     #地形配置
     terrain_cfg = {
@@ -230,11 +230,11 @@ def get_cfgs():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("-B", "--num_envs", type=int, default=8192)
+    parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
-    gs.init(logging_level="warning",backend=gs.vulkan)
+    gs.init(logging_level="warning",backend=gs.gpu)
     gs.device="cuda:0"
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, curriculum_cfg, domain_rand_cfg, terrain_cfg = get_cfgs()

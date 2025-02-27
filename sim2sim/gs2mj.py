@@ -45,7 +45,6 @@ def world2self(quat, v):
     return result.to(device)
 
 def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0.0, 0.22]):
-    actions = torch.clip(actions, -env_cfg["clip_actions"], env_cfg["clip_actions"])
     commands_scale = torch.tensor(
         [obs_scales["lin_vel"], obs_scales["lin_vel"], 
          obs_scales["ang_vel"], obs_scales["height_measurements"]], device=device, dtype=torch.float32)
@@ -54,6 +53,8 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
     projected_gravity = world2self(base_quat,torch.tensor(gravity, device=device, dtype=torch.float32))
     base_lin_vel = world2self(base_quat,get_sensor_data("base_lin_vel"))
     base_ang_vel = get_sensor_data("base_ang_vel")
+    print("base_lin_vel:", base_lin_vel)
+    print("base_ang_vel:", base_ang_vel)
     dof_pos = torch.zeros(env_cfg["num_actions"], device=device, dtype=torch.float32)
     for i, dof_name in enumerate(env_cfg["dof_names"]):
         dof_pos[i] = get_sensor_data(dof_name+"_p")[0]
@@ -129,6 +130,7 @@ def main():
     with mujoco.viewer.launch_passive(m, d) as viewer:
         while viewer.is_running():
             actions = loaded_policy(obs_buf)
+            actions = torch.clip(actions, -env_cfg["clip_actions"], env_cfg["clip_actions"])
             slice_obs_buf = get_obs(env_cfg=env_cfg, obs_scales=obs_cfg["obs_scales"],
                                     actions=actions, default_dof_pos=default_dof_pos, commands=commands)
             slice_obs_buf = slice_obs_buf.unsqueeze(0)
@@ -140,9 +142,8 @@ def main():
             history_obs_buf[-1, :] = slice_obs_buf 
 
             # 更新动作
-            act = torch.clamp(actions, -env_cfg["clip_actions"], env_cfg["clip_actions"])
-            target_dof_pos = act[0:4] * env_cfg["joint_action_scale"] + default_dof_pos[0:4]
-            target_dof_vel = act[4:6] * 10#env_cfg["wheel_action_scale"]
+            target_dof_pos = actions[0:4] * env_cfg["joint_action_scale"] + default_dof_pos[0:4]
+            target_dof_vel = actions[4:6] * 1.0#env_cfg["wheel_action_scale"]
             target_dof_pos = torch.clamp(target_dof_pos, dof_pos_lower[0:4],dof_pos_upper[0:4])
             # print("act:", act)
             for i in range(env_cfg["num_actions"]-2):
@@ -162,9 +163,8 @@ def main():
                 mujoco.mj_step(m, d)
             # 更新渲染
             viewer.sync()
-            # time.sleep(0.01)
             # 同步时间
-            time_until_next_step = m.opt.timestep - (time.time() - step_start)
+            time_until_next_step = m.opt.timestep*5 - (time.time() - step_start)
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
 
