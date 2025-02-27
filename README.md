@@ -89,10 +89,9 @@ When using NVIDIA GPUs, it is recommended that the genesis backend choose gpu or
 When using AMD GPUs, it is recommended to select vulkan for the genesis backend  
 
 ## Demo of the effect    
-[25赛季平衡底盘仿真](https://www.bilibili.com/video/BV1DUNHe7EjP/?share_source=copy_web>)  
-[别平步了，要不双足吧](https://www.bilibili.com/video/BV1oSN8eUEXw/?share_source=copy_web>)   
-[这是平步模式了](https://www.bilibili.com/video/BV1YoNDevENT/?share_source=copy_web>)    
-[【开源】genesis双轮足机器人强化学习（基础版）](https://www.bilibili.com/video/BV14eKKeiEJB/?share_source=copy_web) 
+[【开源】genesis双轮足机器人强化学习（基础版）](https://www.bilibili.com/video/BV14eKKeiEJB/?share_source=copy_web)   
+[【开源】genesis轮足框架更新，增强地形适应能力](https://www.bilibili.com/video/BV16MAHeZEDK/?share_source=copy_web)   
+[【开源】genesis强化学习仿真迁移测试](https://www.bilibili.com/video/BV1LUPgeREcb/?share_source=copy_web)  
 ## Changelog
 |version|description|
 |-------|-----------|
