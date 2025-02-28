@@ -497,10 +497,10 @@ class WheelLeggedEnv:
                                  ls_idx_local=np.arange(0, self.robot.n_links),
                                  envs_idx = envs_idx)
 
-        kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kp
+        kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kp[0]
         self.robot.set_dofs_kp(kp_shift, self.motor_dofs, envs_idx=envs_idx)
 
-        kd_shift = (self.kd_low + self.kd_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kd
+        kd_shift = (self.kd_low + self.kd_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kd[0]
         self.robot.set_dofs_kv(kd_shift, self.motor_dofs, envs_idx = envs_idx)
 
         #random_default_joint_angles
