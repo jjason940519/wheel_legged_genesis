@@ -335,6 +335,7 @@ class WheelLeggedEnv:
 
         # check terrain_buf
         # 线速度达到预设的60%范围，角速度达到60%以上去其他地形
+        self.terrain_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         self.terrain_buf = self.command_ranges[:, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.6
         self.terrain_buf &= self.command_ranges[:, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.6
         
@@ -678,7 +679,6 @@ class WheelLeggedEnv:
 
     def _reward_dof_vel(self):
         # Penalize dof velocities
-        print(torch.sum(torch.square(self.dof_vel[:, :4]), dim=1).size())
         return torch.sum(torch.square(self.dof_vel[:, :4]), dim=1)
 
     def _reward_dof_acc(self):
@@ -701,9 +701,10 @@ class WheelLeggedEnv:
         return collision
 
     def _reward_terrain(self):
-        extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
-        extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
-        + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
-        return extra_terrain_rew
-        # return torch.sum(self.terrain_buf,dim=1) / self.num_envs
+        # extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
+        # extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+        # extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
+        # + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
+        # return extra_terrain_rew
+        
+        return self.terrain_buf
