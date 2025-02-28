@@ -497,10 +497,10 @@ class WheelLeggedEnv:
                                  ls_idx_local=np.arange(0, self.robot.n_links),
                                  envs_idx = envs_idx)
 
-        kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kp[0]
+        kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions)) * self.kp[0]
         self.robot.set_dofs_kp(kp_shift, self.motor_dofs, envs_idx=envs_idx)
 
-        kd_shift = (self.kd_low + self.kd_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kd[0]
+        kd_shift = (self.kd_low + self.kd_range * torch.rand(len(envs_idx), self.num_actions)) * self.kd[0]
         self.robot.set_dofs_kv(kd_shift, self.motor_dofs, envs_idx = envs_idx)
 
         #random_default_joint_angles
@@ -701,9 +701,9 @@ class WheelLeggedEnv:
         return collision
 
     def _reward_terrain(self):
-        # extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
-        # extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        # extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
-        # + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
-        # return extra_terrain_rew
-        return torch.sum(self.terrain_buf,dim=1) / self.num_envs
+        extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
+        extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+        extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
+        + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
+        return extra_terrain_rew
+        # return torch.sum(self.terrain_buf,dim=1) / self.num_envs
