@@ -140,10 +140,12 @@ class WheelLeggedEnv:
         self.motor_dofs = [self.robot.get_joint(name).dof_idx_local for name in self.env_cfg["dof_names"]]
 
         # PD control parameters
-        kp = np.full((self.num_envs, self.num_actions), self.env_cfg["kp"])
-        kd = np.full((self.num_envs, self.num_actions), self.env_cfg["kd"])
-        self.robot.set_dofs_kp(kp, self.motor_dofs)
-        self.robot.set_dofs_kv(kd, self.motor_dofs)
+        self.kp = np.full((self.num_envs, self.num_actions), self.env_cfg["joint_kp"])
+        self.kd = np.full((self.num_envs, self.num_actions), self.env_cfg["joint_kd"])
+        self.kp[:,4:6] = self.env_cfg["wheel_kp"]
+        self.kd[:,4:6] = self.env_cfg["wheel_kd"]
+        self.robot.set_dofs_kp(self.kp, self.motor_dofs)
+        self.robot.set_dofs_kv(self.kd, self.motor_dofs)
         
         
         damping = np.full((self.num_envs,self.robot.n_dofs), self.env_cfg["damping"])
@@ -332,8 +334,8 @@ class WheelLeggedEnv:
         )
 
         # check terrain_buf
-        # 线速度达到预设的80%范围，角速度达到60%以上去其他地形
-        self.terrain_buf = self.command_ranges[:, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.8
+        # 线速度达到预设的60%范围，角速度达到60%以上去其他地形
+        self.terrain_buf = self.command_ranges[:, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.6
         self.terrain_buf &= self.command_ranges[:, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.6
         
         # check termination and reset
@@ -495,10 +497,10 @@ class WheelLeggedEnv:
                                  ls_idx_local=np.arange(0, self.robot.n_links),
                                  envs_idx = envs_idx)
 
-        kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions)) * self.env_cfg["kp"]
+        kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kp
         self.robot.set_dofs_kp(kp_shift, self.motor_dofs, envs_idx=envs_idx)
 
-        kd_shift = (self.kd_low + self.kd_range * torch.rand(len(envs_idx), self.num_actions)) * self.env_cfg["kd"]
+        kd_shift = (self.kd_low + self.kd_range * torch.rand(len(envs_idx), self.num_actions-2)) * self.kd
         self.robot.set_dofs_kv(kd_shift, self.motor_dofs, envs_idx = envs_idx)
 
         #random_default_joint_angles
@@ -676,11 +678,12 @@ class WheelLeggedEnv:
 
     def _reward_dof_vel(self):
         # Penalize dof velocities
+        print(torch.sum(torch.square(self.dof_vel[:, :4]), dim=1).size())
         return torch.sum(torch.square(self.dof_vel[:, :4]), dim=1)
 
     def _reward_dof_acc(self):
         # Penalize z axis base linear velocity
-        return torch.sum(torch.square((self.dof_vel[:, :4] - self.last_dof_vel[:, :4])/self.dt))
+        return torch.sum(torch.square((self.dof_vel - self.last_dof_vel)/self.dt))
 
     def _reward_dof_force(self):
         # Penalize z axis base linear velocity
@@ -698,8 +701,9 @@ class WheelLeggedEnv:
         return collision
 
     def _reward_terrain(self):
-        extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
-        extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
-        + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
-        return extra_terrain_rew
+        # extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
+        # extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+        # extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
+        # + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
+        # return extra_terrain_rew
+        return torch.sum(self.terrain_buf,dim=1) / self.num_envs
