@@ -334,10 +334,9 @@ class WheelLeggedEnv:
         )
 
         # check terrain_buf
-        # 线速度达到预设的60%范围，角速度达到60%以上去其他地形
-        self.terrain_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
+        # 线速度达到预设的60%范围，角速度达到50%以上去其他地形
         self.terrain_buf = self.command_ranges[:, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.6
-        self.terrain_buf &= self.command_ranges[:, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.6
+        self.terrain_buf &= self.command_ranges[:, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.5
         
         # check termination and reset
         if(self.mode):
@@ -534,7 +533,7 @@ class WheelLeggedEnv:
         max_condition = error > upper_err
         # 调整 scale
         scale[min_condition] += scale_step
-        scale[max_condition] -= scale_step * 2
+        scale[max_condition] -= scale_step * 5
         scale.clip_(min_range, 1)
         # 更新 command_ranges
         range_min, range_max = range_cfg

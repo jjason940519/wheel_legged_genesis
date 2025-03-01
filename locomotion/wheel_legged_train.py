@@ -14,11 +14,11 @@ def get_train_cfg(exp_name, max_iterations):
     train_cfg_dict = {
         "algorithm": {
             "clip_param": 0.15,
-            "desired_kl": 0.005,
-            "entropy_coef": 0.01,
+            "desired_kl": 0.003,
+            "entropy_coef": 0.008,
             "gamma": 0.995,
             "lam": 0.95,
-            "learning_rate": 1e-4,
+            "learning_rate": 1e-3,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
             "num_mini_batches": 5,
@@ -31,7 +31,7 @@ def get_train_cfg(exp_name, max_iterations):
             "activation": "elu",
             "actor_hidden_dims": [512, 256, 128, 64],
             "critic_hidden_dims": [256, 128, 64],
-            "init_noise_std": 5.0,
+            "init_noise_std": 8.0,
         },
         "runner": {
             "algorithm_class_name": "PPO",
@@ -105,7 +105,7 @@ def get_cfgs():
         "joint_kp": 20.0,
         "joint_kd": 0.5,
         "wheel_kp": 15.0,
-        "wheel_kd": 0.0,
+        "wheel_kd": 0.3,
         "damping": 2,
         "stiffness":1.5, #不包含轮
         "armature":0.2,
@@ -130,7 +130,7 @@ def get_cfgs():
             "mjcf":[0.0, 0.0, 0.285],
             },
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
-        "episode_length_s": 10.0,
+        "episode_length_s": 15.0,
         "resampling_time_s": 5.0,
         "joint_action_scale": 0.5,
         "wheel_action_scale": 10,
@@ -152,14 +152,14 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.2, 
-        "tracking_ang_sigma": 0.2, 
+        "tracking_lin_sigma": 0.25, 
+        "tracking_ang_sigma": 0.25, 
         "tracking_height_sigma": 0.001,
         "tracking_similar_legged_sigma": 0.1,
         "tracking_gravity_sigma": 0.02,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 1.2,
+            "tracking_ang_vel": 1.0,
             "tracking_base_height": 2.0,    #和similar_legged对抗，similar_legged先提升会促进此项
             "lin_vel_z": -0.2, #大了影响高度变换速度
             "joint_action_rate": -0.003,
@@ -167,8 +167,8 @@ def get_cfgs():
             "similar_to_default": 0.0,
             "projected_gravity": 6.0,
             "similar_legged": 0.7,  #tracking_base_height和knee_height对抗
-            "dof_vel": -0.05,
-            "dof_acc": -0.5e-9,
+            "dof_vel": -0.005,
+            "dof_acc": -2e-9,
             "dof_force": -0.0001,
             "knee_height": -0.3,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.02,
@@ -178,7 +178,7 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 4,
-        "base_range": 0.3,  #基础范围
+        "base_range": 0.10,  #基础范围
         "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
@@ -191,13 +191,13 @@ def get_cfgs():
             "projected_gravity",
             "similar_legged", 
         },
-        "curriculum_lin_vel_step":0.005,   #比例
-        "curriculum_ang_vel_step":0.001,   #比例
+        "curriculum_lin_vel_step":0.001,   #比例
+        "curriculum_ang_vel_step":0.0003,   #比例
         "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
-        "curriculum_lin_vel_min_range":0.3,   #比例
+        "curriculum_lin_vel_min_range":0.5,   #比例
         "curriculum_ang_vel_min_range":0.15,   #比例
-        "lin_vel_err_range":[0.05,0.15],  #课程误差阈值
-        "ang_vel_err_range":[0.25,0.27],  #课程误差阈值 连续曲线>方波>不波动
+        "lin_vel_err_range":[0.15,0.20],  #课程误差阈值
+        "ang_vel_err_range":[0.3,0.4],  #课程误差阈值 连续曲线>方波>不波动
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
@@ -232,7 +232,7 @@ def get_cfgs():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("-B", "--num_envs", type=int, default=4096)
+    parser.add_argument("-B", "--num_envs", type=int, default=8192)
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 
