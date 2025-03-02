@@ -55,6 +55,7 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
     base_ang_vel = get_sensor_data("base_ang_vel")
     print("base_lin_vel:", base_lin_vel)
     print("base_ang_vel:", base_ang_vel)
+    print("commands:", commands)
     dof_pos = torch.zeros(env_cfg["num_actions"], device=device, dtype=torch.float32)
     for i, dof_name in enumerate(env_cfg["dof_names"]):
         dof_pos[i] = get_sensor_data(dof_name+"_p")[0]
@@ -142,7 +143,7 @@ def main():
             history_obs_buf[-1, :] = slice_obs_buf 
 
             # 更新动作
-            target_dof_pos = actions[0:4] * env_cfg["joint_action_scale"] + default_dof_pos[0:4]
+            target_dof_pos = actions[0:4] * 0.05#env_cfg["joint_action_scale"] + default_dof_pos[0:4]
             target_dof_vel = actions[4:6] * 1.0#env_cfg["wheel_action_scale"]
             target_dof_pos = torch.clamp(target_dof_pos, dof_pos_lower[0:4],dof_pos_upper[0:4])
             # print("act:", act)

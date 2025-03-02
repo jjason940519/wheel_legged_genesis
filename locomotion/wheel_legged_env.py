@@ -2,6 +2,7 @@ import torch
 import math
 import genesis as gs # type: ignore
 from genesis.utils.geom import quat_to_xyz, transform_by_quat, inv_quat, transform_quat_by_quat # type: ignore
+from genesis.engine.solvers.rigid.rigid_solver_decomp import RigidSolver
 import numpy as np
 import cv2
 
@@ -132,7 +133,6 @@ class WheelLeggedEnv:
                         quat=self.base_init_quat.cpu().numpy(),
                     ),
                 )
-            
         # build
         self.scene.build(n_envs=num_envs)
 
@@ -262,6 +262,10 @@ class WheelLeggedEnv:
         #域随机化 domain_rand_cfg
         self.friction_ratio_low = self.domain_rand_cfg["friction_ratio_range"][0]
         self.friction_ratio_range = self.domain_rand_cfg["friction_ratio_range"][1] - self.friction_ratio_low
+        self.base_mass_low = self.domain_rand_cfg["random_base_mass_shift_range"][0]
+        self.base_mass_range = self.domain_rand_cfg["random_base_mass_shift_range"][1] - self.base_mass_low  
+        self.other_mass_low = self.domain_rand_cfg["random_other_mass_shift_range"][0]
+        self.other_mass_range = self.domain_rand_cfg["random_other_mass_shift_range"][1] - self.other_mass_low            
         self.dof_damping_low = self.domain_rand_cfg["dof_damping_range"][0]
         self.dof_damping_range = self.domain_rand_cfg["dof_damping_range"][1] - self.dof_damping_low
         self.dof_stiffness_low = self.domain_rand_cfg["dof_stiffness_range"][0]
@@ -278,6 +282,12 @@ class WheelLeggedEnv:
         #地形训练索引
         self.terrain_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         # print("self.obs_buf.size(): ",self.obs_buf.size())
+        
+        #外部力
+        for solver in self.scene.sim.solvers:
+            if not isinstance(solver, RigidSolver):
+                continue
+            rigid_solver = solver
         
     def _resample_commands(self, envs_idx):
         for idx in envs_idx:
@@ -334,9 +344,11 @@ class WheelLeggedEnv:
         )
 
         # check terrain_buf
-        # 线速度达到预设的60%范围，角速度达到50%以上去其他地形
-        self.terrain_buf = self.command_ranges[:, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.6
-        self.terrain_buf &= self.command_ranges[:, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.5
+        # 线速度达到预设的90%范围，角速度达到90%以上去其他地形(建议高一点)
+        self.terrain_buf = self.command_ranges[:, 0, 1] > self.command_cfg["lin_vel_x_range"][1] * 0.9
+        self.terrain_buf &= self.command_ranges[:, 2, 1] > self.command_cfg["ang_vel_range"][1] * 0.9
+        #固定一部分去地形
+        self.terrain_buf[:int(self.num_envs*0.4)] = 1
         
         # check termination and reset
         if(self.mode):
@@ -483,8 +495,8 @@ class WheelLeggedEnv:
                                       ls_idx_local=np.arange(0, self.robot.n_links),
                                       envs_idx = envs_idx)
 
-        base_mass_shift = -self.domain_rand_cfg["random_base_mass_shift"] / 2 + self.domain_rand_cfg["random_base_mass_shift"] * torch.rand(len(envs_idx), 1, device=self.device)
-        other_mass_shift = -self.domain_rand_cfg["random_other_mass_shift"] / 2 + self.domain_rand_cfg["random_other_mass_shift"] * torch.rand(len(envs_idx), self.robot.n_links - 1, device=self.device)
+        base_mass_shift = self.base_mass_low + self.base_mass_range * torch.rand(len(envs_idx), 1, device=self.device)
+        other_mass_shift =-self.other_mass_low + self.other_mass_range * torch.rand(len(envs_idx), self.robot.n_links - 1, device=self.device)
         mass_shift = torch.cat((base_mass_shift, other_mass_shift), dim=1)
         self.robot.set_mass_shift(mass_shift=mass_shift,
                                   ls_idx_local=np.arange(0, self.robot.n_links),
@@ -699,11 +711,11 @@ class WheelLeggedEnv:
             collision += torch.square(self.connect_force[:,idx,:]).sum(dim=1)
         return collision
 
-    def _reward_terrain(self):
-        # extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
-        # extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        # extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
-        # + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
-        # return extra_terrain_rew
+    # def _reward_terrain(self):
+    #     # extra_lin_vel = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]),dim=1)
+    #     # extra_ang_vel = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+    #     # extra_terrain_rew = torch.exp(-extra_lin_vel / self.reward_cfg["tracking_lin_sigma"]) 
+    #     # + torch.exp(-extra_ang_vel / self.reward_cfg["tracking_ang_sigma"])
+    #     # return extra_terrain_rew
         
-        return self.terrain_buf
+    #     return self.terrain_buf

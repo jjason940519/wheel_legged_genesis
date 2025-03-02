@@ -4,6 +4,7 @@ import time
 import cv2
 import math
 import torch
+from genesis.engine.solvers.rigid.rigid_solver_decomp import RigidSolver
 gs.init(backend=gs.vulkan)
 
 scene = gs.Scene(
@@ -32,7 +33,7 @@ plane = scene.add_entity(
 
 robot = scene.add_entity(
     gs.morphs.URDF(file="assets/urdf/nz/urdf/nz.urdf",
-    pos=(0.0, 0.0, 0.0)
+    pos=(0.0, 0.0, 0.15)
     ),
     # gs.morphs.MJCF(file="assets/mjcf/urdf2nz/urdf2nz.xml",
     # pos=(0.0, 0.0, 0.15)
@@ -40,7 +41,7 @@ robot = scene.add_entity(
     # vis_mode='collision'
 )
 
-height_field = cv2.imread("assets/terrain/png/agent_train_gym.png", cv2.IMREAD_GRAYSCALE)
+# height_field = cv2.imread("assets/terrain/png/stairs.png", cv2.IMREAD_GRAYSCALE)
 # terrain_height = torch.tensor(height_field) * 0.1
 # print(terrain_height.size())
 # terrain = scene.add_entity(
@@ -59,7 +60,12 @@ cam = scene.add_camera(
     fov    = 30,
     GUI    = False,
 )
-scene.build(n_envs=2)
+scene.build(n_envs=1)
+
+for solver in scene.sim.solvers:
+    if not isinstance(solver, RigidSolver):
+        continue
+    rigid_solver = solver
 
 jnt_names = [
     # "left_hip_joint",
@@ -95,17 +101,23 @@ print(link.idx)
 import numpy as np
 scene.step()
 while True:
+    link_pos = rigid_solver.get_links_pos([1,])
+    force = 100 * link_pos
+    rigid_solver.apply_links_external_force(
+        force=force,
+        links_idx=[1,],
+    )
     # robot.control_dofs_position(
     #         np.array([-0.5, 0.0, -0.5, 0.0, 0.0, 0.0]),
     #         dofs_idx,
     #     )
-    # scene.step()
+    scene.step()
     # print(robot.get_pos())
     # left_knee_pos = left_knee.get_pos()
     # print("left_knee_pos    ",left_knee_pos)
     # force = robot.get_links_net_contact_force()
     # dof_vel = robot.get_dofs_velocity()
-    print("dof_pos:",robot.get_dofs_position(dofs_idx))
+    # print("dof_pos:",robot.get_dofs_position(dofs_idx))
     # time.sleep(0.1)
     cam.render()
 # cam.stop_recording(save_to_filename='video.mp4', fps=60)

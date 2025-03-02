@@ -13,12 +13,12 @@ def get_train_cfg(exp_name, max_iterations):
 
     train_cfg_dict = {
         "algorithm": {
-            "clip_param": 0.15,
-            "desired_kl": 0.003,
-            "entropy_coef": 0.008,
+            "clip_param": 0.2,
+            "desired_kl": 0.006,
+            "entropy_coef": 0.01,
             "gamma": 0.995,
             "lam": 0.95,
-            "learning_rate": 1e-3,
+            "learning_rate": 0.5e-3,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
             "num_mini_batches": 5,
@@ -31,7 +31,7 @@ def get_train_cfg(exp_name, max_iterations):
             "activation": "elu",
             "actor_hidden_dims": [512, 256, 128, 64],
             "critic_hidden_dims": [256, 128, 64],
-            "init_noise_std": 8.0,
+            "init_noise_std": 4.0,
         },
         "runner": {
             "algorithm_class_name": "PPO",
@@ -152,14 +152,14 @@ def get_cfgs():
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
-        "tracking_lin_sigma": 0.25, 
-        "tracking_ang_sigma": 0.25, 
-        "tracking_height_sigma": 0.001,
+        "tracking_lin_sigma": 0.3, 
+        "tracking_ang_sigma": 0.15, 
+        "tracking_height_sigma": 0.003,
         "tracking_similar_legged_sigma": 0.1,
         "tracking_gravity_sigma": 0.02,
         "reward_scales": {
             "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 1.0,
+            "tracking_ang_vel": 1.5,
             "tracking_base_height": 2.0,    #和similar_legged对抗，similar_legged先提升会促进此项
             "lin_vel_z": -0.2, #大了影响高度变换速度
             "joint_action_rate": -0.003,
@@ -173,12 +173,12 @@ def get_cfgs():
             "knee_height": -0.3,    #相当有效，和similar_legged结合可以抑制劈岔和跪地重启，稳定运行
             "ang_vel_xy": -0.02,
             "collision": -0.0008,  #base接触地面碰撞力越大越惩罚，数值太大会摆烂
-            "terrain":0.1,
+            # "terrain":0.1,
         },
     }
     command_cfg = {
         "num_commands": 4,
-        "base_range": 0.10,  #基础范围
+        "base_range": 1.0,  #基础范围
         "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
@@ -186,14 +186,9 @@ def get_cfgs():
     }
     # 课程学习，奖励循序渐进 待优化
     curriculum_cfg = {
-        "curriculum_reward": {
-            "tracking_base_height",
-            "projected_gravity",
-            "similar_legged", 
-        },
-        "curriculum_lin_vel_step":0.001,   #比例
+        "curriculum_lin_vel_step":0.0009,   #比例
         "curriculum_ang_vel_step":0.0003,   #比例
-        "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
+        # "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
         "curriculum_lin_vel_min_range":0.5,   #比例
         "curriculum_ang_vel_min_range":0.15,   #比例
         "lin_vel_err_range":[0.15,0.20],  #课程误差阈值
@@ -202,8 +197,8 @@ def get_cfgs():
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
         "friction_ratio_range":[0.8 , 1.2],
-        "random_base_mass_shift":2.0, #质量偏移量
-        "random_other_mass_shift":0.1,  #质量偏移量
+        "random_base_mass_shift_range":[-1 , 1], #质量偏移量
+        "random_other_mass_shift_range":[-0.1, 0.1],  #质量偏移量
         "random_base_com_shift":0.05, #位置偏移量 xyz
         "random_other_com_shift":0.01, #位置偏移量 xyz
         "random_KP":[0.9, 1.1], #比例
@@ -232,7 +227,7 @@ def get_cfgs():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
-    parser.add_argument("-B", "--num_envs", type=int, default=8192)
+    parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=10000)
     args = parser.parse_args()
 

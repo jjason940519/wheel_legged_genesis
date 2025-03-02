@@ -40,7 +40,7 @@ def main():
         curriculum_cfg=curriculum_cfg,
         domain_rand_cfg=domain_rand_cfg,
         terrain_cfg=terrain_cfg,
-        robot_morphs="mjcf",
+        robot_morphs="urdf",
         show_viewer=True,
         train_mode=False
     )

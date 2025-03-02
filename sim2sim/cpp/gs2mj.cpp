@@ -413,7 +413,7 @@ int main(int argc, const char **argv) {
     for (int i = 0; i < env_cfg.num_actions; i++) {
       d->ctrl[i] = actions[i];
     }
-    // cout_vector(commands, "commands", Color::Red);
+    cout_vector(commands, "commands", Color::Red);
     // cout_vector(actions, "actions", Color::Green);
     // cout_vector(commands, "commands",Color::Red);
 

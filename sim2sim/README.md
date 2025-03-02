@@ -1,5 +1,8 @@
-# sim2sim
+# Sim2Sim
 **Two migration methods： CPP and Python, are provided to Mujoco**
+**prepare**
+You need to change the absolute path in sim2sim/scence.xml   
+修改sim2sim/scence.xml中绝对路径部分  
 ## CPP
 ### Before running
 ```
@@ -21,3 +24,6 @@ you need a gamepad
 pip install mujoco
 ### run
 in sim2sim `python gs2mj.py`
+### note  
+When the joint angle in the mujoco reaches +-300, it is forced to lock again, and do not send a control command all the time during the test  
+mujoco中关节角度在达到+-300的时候回强制锁死，测试的过程中不要一直发送一个控制指令  
