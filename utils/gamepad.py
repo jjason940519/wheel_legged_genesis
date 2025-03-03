@@ -14,7 +14,7 @@ class control_gamepad:
             screen_width = 300
             screen_height = 480
             self.screen = pygame.display.set_mode((screen_width, screen_height))
-            image_path = "picture/keyboard_key.png"
+            image_path = "wheel_legged_genesis/picture/keyboard_key.png"
             image_center = (160, 240)
             pygame.display.set_caption("请用此窗口进行键盘控制(This use your keyboard)")
             try:
