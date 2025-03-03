@@ -92,6 +92,7 @@ When using AMD GPUs, it is recommended to select vulkan for the genesis backend
 [【开源】genesis双轮足机器人强化学习（基础版）](https://www.bilibili.com/video/BV14eKKeiEJB/?share_source=copy_web)   
 [【开源】genesis轮足框架更新，增强地形适应能力](https://www.bilibili.com/video/BV16MAHeZEDK/?share_source=copy_web)   
 [【开源】genesis强化学习仿真迁移测试](https://www.bilibili.com/video/BV1LUPgeREcb/?share_source=copy_web)  
+[【开源】强化学习双轮足完美战胜mujoco](https://www.bilibili.com/video/BV1m79hYgEbA/?share_source=copy_web)    
 ## Changelog
 |version|description|
 |-------|-----------|
