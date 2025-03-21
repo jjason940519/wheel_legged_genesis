@@ -64,7 +64,7 @@ class WheelLeggedEnv:
         )
 
         # add plane
-        self.scene.add_entity(gs.morphs.URDF(file="wheel_legged_genesis/assets/terrain/plane/plane.urdf", fixed=True))
+        self.scene.add_entity(gs.morphs.URDF(file="../assets/terrain/plane/plane.urdf", fixed=True))
         # init roboot quat and pos
         match robot_morphs:
             case "urdf":
@@ -78,7 +78,7 @@ class WheelLeggedEnv:
         # add terrain 只能有一个Terrain(genesis v0.2.1)
         self.horizontal_scale = self.terrain_cfg["horizontal_scale"]
         self.vertical_scale = self.terrain_cfg["vertical_scale"]
-        self.height_field = cv2.imread("wheel_legged_genesis/assets/terrain/png/"+self.terrain_cfg["train"]+".png", cv2.IMREAD_GRAYSCALE)
+        self.height_field = cv2.imread("../assets/terrain/png/"+self.terrain_cfg["train"]+".png", cv2.IMREAD_GRAYSCALE)
         self.terrain_height = torch.tensor(self.height_field, device=self.device) * self.vertical_scale
         if self.terrain_cfg["terrain"]:
             print("\033[1;35m open terrain\033[0m")
@@ -114,21 +114,21 @@ class WheelLeggedEnv:
             case "urdf":
                 self.robot = self.scene.add_entity(
                     gs.morphs.URDF(
-                        file="wheel_legged_genesis/assets/urdf/nz/urdf/nz.urdf",
+                        file="../assets/urdf/nz/urdf/nz.urdf",
                         pos = base_init_pos,
                         quat=self.base_init_quat.cpu().numpy(),
                     ),
                 )
             case "mjcf":
                 self.robot = self.scene.add_entity(
-                    gs.morphs.MJCF(file="/wheel_legged_genesis/assets/mjcf/nz/nz_view.xml",
+                    gs.morphs.MJCF(file="../assets/mjcf/nz/nz_view.xml",
                     pos=base_init_pos),
                     vis_mode='collision'
                 )
             case _:
                 self.robot = self.scene.add_entity(
                     gs.morphs.URDF(
-                        file="wheel_legged_genesis/assets/urdf/nz/urdf/nz.urdf",
+                        file="../assets/urdf/nz/urdf/nz.urdf",
                         pos = base_init_pos,
                         quat=self.base_init_quat.cpu().numpy(),
                     ),
@@ -149,7 +149,7 @@ class WheelLeggedEnv:
         
         
         damping = np.full((self.num_envs,self.robot.n_dofs), self.env_cfg["damping"])
-        damping[:,:6] = 0
+        damping[:,:6] = 0 #because the fr
         self.robot.set_dofs_damping(damping=damping, 
                                    dofs_idx_local=np.arange(0,self.robot.n_dofs)
                                    )
@@ -317,7 +317,7 @@ class WheelLeggedEnv:
         self.base_euler = quat_to_xyz(
             transform_quat_by_quat(torch.ones_like(self.base_quat) * self.inv_base_init_quat, self.base_quat)
         )
-        inv_base_quat = inv_quat(self.base_quat)
+        inv_base_quat = inv_quat(self.base_quat)    
         self.base_lin_vel[:] = transform_by_quat(self.robot.get_vel(), inv_base_quat)
         self.base_lin_acc[:] = (self.base_lin_vel[:] - self.last_base_lin_vel[:])/ self.dt
         self.base_ang_vel[:] = transform_by_quat(self.robot.get_ang(), inv_base_quat)
@@ -492,21 +492,21 @@ class WheelLeggedEnv:
     def domain_rand(self, envs_idx):
         friction_ratio = self.friction_ratio_low + self.friction_ratio_range * torch.rand(len(envs_idx), self.robot.n_links)
         self.robot.set_friction_ratio(friction_ratio=friction_ratio,
-                                      ls_idx_local=np.arange(0, self.robot.n_links),
+                                     link_indices=np.arange(0, self.robot.n_links),
                                       envs_idx = envs_idx)
 
         base_mass_shift = self.base_mass_low + self.base_mass_range * torch.rand(len(envs_idx), 1, device=self.device)
         other_mass_shift =-self.other_mass_low + self.other_mass_range * torch.rand(len(envs_idx), self.robot.n_links - 1, device=self.device)
         mass_shift = torch.cat((base_mass_shift, other_mass_shift), dim=1)
         self.robot.set_mass_shift(mass_shift=mass_shift,
-                                  ls_idx_local=np.arange(0, self.robot.n_links),
+                                  link_indices=np.arange(0, self.robot.n_links),
                                   envs_idx = envs_idx)
 
         base_com_shift = -self.domain_rand_cfg["random_base_com_shift"] / 2 + self.domain_rand_cfg["random_base_com_shift"] * torch.rand(len(envs_idx), 1, 3, device=self.device)
         other_com_shift = -self.domain_rand_cfg["random_other_com_shift"] / 2 + self.domain_rand_cfg["random_other_com_shift"] * torch.rand(len(envs_idx), self.robot.n_links - 1, 3, device=self.device)
         com_shift = torch.cat((base_com_shift, other_com_shift), dim=1)
         self.robot.set_COM_shift(com_shift=com_shift,
-                                 ls_idx_local=np.arange(0, self.robot.n_links),
+                                 link_indices=np.arange(0, self.robot.n_links),
                                  envs_idx = envs_idx)
 
         kp_shift = (self.kp_low + self.kp_range * torch.rand(len(envs_idx), self.num_actions)) * self.kp[0]

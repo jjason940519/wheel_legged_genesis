@@ -14,7 +14,7 @@ class control_gamepad:
             screen_width = 300
             screen_height = 480
             self.screen = pygame.display.set_mode((screen_width, screen_height))
-            image_path = "wheel_legged_genesis/picture/keyboard_key.png"
+            image_path = "/home/crazy_dog/jason-ws/wheel_legged_robot/wheel_legged_genesis/picture/keyboard_key.png"
             image_center = (160, 240)
             pygame.display.set_caption("请用此窗口进行键盘控制(This use your keyboard)")
             try:
@@ -110,6 +110,7 @@ class control_gamepad:
                         case pygame.K_e:
                             self.commands[2] = 0
         self.commands_clip()
+        print(self.commands)
         return self.commands,reset_flag
     
     def commands_clip(self):
@@ -136,3 +137,9 @@ class control_gamepad:
             self.commands[3] = self.command_cfg["height_target_range"][0]
         elif self.commands[3] > self.command_cfg["height_target_range"][1]:
             self.commands[3] = self.command_cfg["height_target_range"][1]
+
+        #base_heigh
+        # if self.commands[3] < self.command_cfg["height_target_range"][0]:
+        #     self.commands[3] = self.command_cfg["height_target_range"][0]
+        # elif self.commands[3] > 0.6:
+        #     self.commands[3] = self.command_cfg["height_target_range"][1]

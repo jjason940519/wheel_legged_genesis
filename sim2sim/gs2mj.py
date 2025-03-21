@@ -9,12 +9,13 @@ import pickle
 import numpy as np
 
 # 加载 mujoco 模型
-m = mujoco.MjModel.from_xml_path('./scence.xml')
+m = mujoco.MjModel.from_xml_path('scence.xml')
 d = mujoco.MjData(m)
 
-utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils'))
-# 将 utils 文件夹路径添加到 sys.path
-sys.path.append(utils_path)
+# utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+# # 将 utils 文件夹路径添加到 sys.path
+# sys.path.append(utils_path)
+# print("path",utils_path)
 
 # 导入 utils 中的 gamepad 模块
 import gamepad
@@ -82,11 +83,11 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
+    parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walkingv0.0.7")
     args = parser.parse_args()
 
     # 拼接到 logs 文件夹的路径
-    log_dir = os.path.join('../logs', args.exp_name)
+    log_dir = os.path.join('../locomotion/logs', args.exp_name)
     cfg_path = os.path.join(log_dir, 'cfgs.pkl')
 
     # 读取配置文件

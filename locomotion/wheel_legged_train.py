@@ -226,9 +226,9 @@ def get_cfgs():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking")
+    parser.add_argument("-e", "--exp_name", type=str, default="wheel-legged-walking-test")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=10000)
+    parser.add_argument("--max_iterations", type=int, default=1000)
     args = parser.parse_args()
 
     gs.init(logging_level="warning",backend=gs.gpu)

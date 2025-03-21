@@ -1,0 +1,168 @@
+<mujoco model="crazydog_urdf">
+    <compiler angle="radian" meshdir="meshes" />
+    <size njmax="500" nconmax="100" />
+
+    <option cone="elliptic" impratio="100" />
+
+    <default>
+        <default class="crazydog">
+            <geom friction="0.4" margin="0.001" condim="1"/>
+            <joint axis="0 1 0" damping="0.1" armature="0.01" frictionloss="0.2"/>
+            <motor ctrlrange="-23.7 23.7"/>
+            <default class="hip">
+                <joint range="-1.57 1.57"/>
+            </default>
+            <default class="knee">
+                <joint range="-2.7 0"/>
+                <motor ctrlrange="-45.43 45.43"/>
+            </default>
+            <default class="visual">
+                <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+            </default>
+            <default class="collision">
+                <geom group="3"/>
+                <default class="foot">
+                <!-- <geom size="0.022" pos="-0.002 0 -0.213" priority="1" condim="6" -->
+                <geom size="0.022" priority="1" condim="6"
+                    friction="0.8 0.02 0.01"/>
+                </default>
+            </default>
+        </default>
+    </default>
+
+
+    <asset>
+        <mesh name="base_link" file="./meshes/base_link.STL" />
+        <mesh name="R_hip_fix" file="./meshes/R_hip_fix.STL" />
+        <mesh name="R_hip" file="./meshes/R_hip.STL" />
+        <mesh name="R_thigh" file="./meshes/R_thigh.STL" />
+        <mesh name="R_calf" file="./meshes/R_calf.STL" />
+        <mesh name="R_wheel" file="./meshes/R_wheel.STL" />
+        <mesh name="L_hip_fix" file="./meshes/L_hip_fix.STL" />
+        <mesh name="L_hip" file="./meshes/L_hip.STL" />
+        <mesh name="L_thigh" file="./meshes/L_thigh.STL" />
+        <mesh name="L_calf" file="./meshes/L_calf.STL" />
+        <mesh name="L_wheel" file="./meshes/L_wheel.STL" />
+        <mesh name="battery" file="./meshes/battery.STL" />
+    </asset>
+    <worldbody>
+        <body name="base_link" pos="0 -0.0762001 0.55">
+            <inertial pos="-0.029918 -1.7786E-06 -0.025244" quat="1 0 0 0" mass="0.62" diaginertia="0.0022988 0.0023924 0.0014316" />
+            <freejoint />
+            <site name="imu" pos="0 0 0" />
+            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.74902 0.74902 0.74902 1" mesh="base_link" />
+            <geom type="mesh" rgba="0.74902 0.74902 0.74902 1" mesh="base_link" />
+            <body name="R_hip_fix" pos="0 0 0">
+                <inertial pos="-0.071968 -0.056165 -9.0424E-05" quat="1 0 0 0" mass="0.536" diaginertia="0.00021465 0.00012408 0.00012018" />
+                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.62745 0.62745 0.62745 1" mesh="R_hip_fix" />
+                <geom type="mesh" rgba="0.62745 0.62745 0.62745 1" mesh="R_hip_fix" />
+                <body name="R_hip">
+                    <inertial pos="0.050012 -0.00066363 -8.4178E-05" quat="1 0 0 0" mass="0.573" diaginertia="0.00013072 0.00024737 0.00015128" />
+                    <geom pos="-0.0532504 -0.05625 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.62745 0.62745 0.62745 1" mesh="R_hip" />
+                    <geom pos="-0.0532504 -0.05625 0" type="mesh" rgba="0.62745 0.62745 0.62745 1" mesh="R_hip" />
+                </body>
+            </body>
+            <body name="L_hip_fix" pos="0 0 0">
+                <inertial pos="-0.071968 -0.056335 -9.0424E-05" quat="1 0 0 0" mass="0.536" diaginertia="0.00021465 0.00012408 0.00012018" />
+                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.62745 0.62745 0.62745 1" mesh="L_hip_fix" />
+                <geom type="mesh" rgba="0.62745 0.62745 0.62745 1" mesh="L_hip_fix" />
+                <body name="L_hip">
+                    <inertial pos="0.050012 0.00066363 -8.4173E-05" quat="1 0 0 0" mass="0.573" diaginertia="0.00013072 0.00024737 0.00015128" />
+                    <geom pos="-0.0532504 0.05625 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.62745 0.62745 0.62745 1" mesh="L_hip" />
+                    <geom pos="-0.0532504 0.05625 0" type="mesh" rgba="0.62745 0.62745 0.62745 1" mesh="L_hip" />   
+                </body>
+            </body>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="battery" />
+            <geom type="mesh" rgba="1 1 1 1" mesh="battery" /> 
+            <body name="R_thigh" pos="0 -0.0762001 0">
+                <inertial pos="-6.2352e-05 -0.039508 -0.021371" quat="0.705767 -0.0617206 0.0614388 0.70307" mass="0.9105" diaginertia="0.00153432 0.0014519 0.000344653" />
+                <joint name="R_hip2thigh" class="hip" />
+                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.62745 0.62745 0.62745 1" mesh="R_thigh" />
+                <geom type="mesh" rgba="0.62745 0.62745 0.62745 1" mesh="R_thigh" />
+                <body name="R_calf" pos="0 -0.0638 -0.215">
+                    <inertial pos="1.5378e-05 -0.0082389 -0.16157" quat="0.706874 -0.0247355 0.0253256 0.706453" mass="0.555" diaginertia="0.00142928 0.001409 7.57253e-05" />
+                    <joint name="R_thigh2calf" class="knee" />
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="R_calf" />
+                    <geom type="mesh" rgba="1 1 1 1" mesh="R_calf" />
+                    <body name="R_wheel" pos="0 -0.02455 -0.215">
+                        <inertial pos="0 -0.0042663 0" quat="0.707107 0 0 0.707107" mass="0.2805" diaginertia="0.00057738 0.00029524 0.00029524" />
+                        <joint name="R_calf2wheel" pos="0 0 0" axis="0 1 0" />
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15294 0.15294 0.15294 1" mesh="R_wheel" />
+                        <geom type="mesh" rgba="0.15294 0.15294 0.15294 1" mesh="R_wheel" />
+                        <geom pos="0 0.0 0" type="mesh" mesh="R_wheel" class="foot"/>
+                    </body>
+                </body>
+            </body>
+            <body name="L_thigh" pos="0 0.0762001 0">
+                <inertial pos="-6.238e-05 0.039508 -0.021371" quat="0.70307 0.0614388 -0.0617207 0.705768" mass="0.9105" diaginertia="0.00153432 0.0014519 0.000344653" />
+                <joint name="L_hip2thigh" class="hip" />
+                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.62745 0.62745 0.62745 1" mesh="L_thigh" />
+                <geom type="mesh" rgba="0.62745 0.62745 0.62745 1" mesh="L_thigh" />
+                <body name="L_calf" pos="0 0.0638 -0.215">
+                    <inertial pos="1.6296e-05 0.0082388 -0.16158" quat="0.706467 0.025327 -0.0247335 0.70686" mass="0.555" diaginertia="0.00142928 0.0014089 7.57375e-05" />
+                    <joint name="L_thigh2calf" class="knee" />
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="L_calf" />
+                    <geom type="mesh" rgba="1 1 1 1" mesh="L_calf" />
+                    <body name="L_wheel" pos="0 0.02455 -0.215">
+                        <inertial pos="0 0.0042663 0" quat="0.707107 0 0 0.707107" mass="0.2805" diaginertia="0.00057738 0.00029524 0.00029524" />
+                        <joint name="L_calf2wheel" pos="0 0 0" axis="0 1 0" />
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.15294 0.15294 0.15294 1" mesh="L_wheel" />
+                        <geom type="mesh" rgba="0.15294 0.15294 0.15294 1" mesh="L_wheel" />
+                        <geom pos="0 0.0 0" type="mesh" mesh="L_wheel" class="foot"/>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <position class="hip" name="L_hip" joint="L_hip2thigh" kp="10" kv="0.3" ctrlrange="-1.57 1.57" forcerange="-15 15"/>
+        <position class="knee" name="L_thigh" joint="L_thigh2calf" kp="10" kv="0.3" ctrlrange="-2.7 0" forcerange="-15 15"/>
+
+        <position class="hip" name="R_hip" joint="R_hip2thigh" kp="10" kv="0.3" ctrlrange="-1.57 1.57" forcerange="-15 15"/>
+        <position class="knee" name="R_thigh" joint="R_thigh2calf" kp="10" kv="0.3" ctrlrange="-2.7 0" forcerange="-15 15"/>
+        
+        <intvelocity name="L_wheel" joint="L_calf2wheel" kp="15" kv="0.3" forcerange="-500 500" actrange="-300 300"/>
+        <intvelocity name="R_wheel" joint="R_calf2wheel" kp="15" kv="0.3" forcerange="-500 500" actrange="-300 300"/>
+    </actuator>
+
+    <sensor>
+        <jointpos name="L_thigh_joint_p" joint="L_hip2thigh" />       
+        <jointpos name="L_calf_joint_p" joint="L_thigh2calf" />
+        <jointpos name="R_thigh_joint_p" joint="R_hip2thigh" />
+        <jointpos name="R_calf_joint_p" joint="R_thigh2calf" />
+
+        <!-- <jointpos name="R_wheel_pos" joint="R_calf2wheel" /> -->
+        <!-- <jointpos name="L_wheel_pos" joint="L_calf2wheel" /> -->
+
+        <jointvel name="L_thigh_joint_v" joint="L_hip2thigh" />
+        <jointvel name="L_calf_joint_v" joint="L_thigh2calf" />
+        <jointvel name="R_thigh_joint_v" joint="R_hip2thigh" />
+        <jointvel name="R_calf_joint_v" joint="R_thigh2calf" />
+        <jointvel name="L_wheel_joint_v" joint="L_calf2wheel" noise="0.0"/>
+        <jointvel name="R_wheel_joint_v" joint="R_calf2wheel" noise="0.0"/>
+
+        <!-- <jointactuatorfrc name="R_hip_torque" joint="R_hip2thigh" noise="0.01" />
+        <jointactuatorfrc name="F_hip_torque" joint="L_hip2thigh" noise="0.01" />
+
+        <jointactuatorfrc name="R_thigh_torque" joint="R_thigh2calf" noise="0.01" />
+        <jointactuatorfrc name="F_thigh_torque" joint="L_thigh2calf" noise="0.01" />
+
+        <jointactuatorfrc name="R_wheel_torque" joint="R_calf2wheel" />
+        <jointactuatorfrc name="F_wheel_torque" joint="L_calf2wheel" /> -->
+
+        <framequat name="orientation" objtype="site" objname="imu" noise="0.0"/>
+         <subtreelinvel name="base_lin_vel" body="base_link" />
+        <gyro name="base_ang_vel" site="imu" noise="0.0"/>
+        <!-- <accelerometer name="imu_acc" site="imu" /> -->
+
+        <framepos name="base_pos" objtype="body" objname="base_link" />
+        <!-- <framelinvel name="frame_lin_vel" objtype="site" objname="imu" />
+        <frameangvel name="frame_ang_vel" objtype="site" objname="imu" /> -->
+    </sensor>
+
+    <!-- <keyframe>
+        <key qpos="0 0 0.3 0 0 0 0 1.047 -2.094 0 1.047 -2.094 0 " name="pose1"/>
+    </keyframe> -->
+
+</mujoco>
