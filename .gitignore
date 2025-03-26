@@ -4,3 +4,6 @@ pdm.lock
 __pycache__
 .venv
 rsl_rl/build
+
+/csl_wheel_legged/logs/*
+locomotion/logs/*

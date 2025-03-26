@@ -101,7 +101,7 @@ def get_cfgs():
         "wheel_kp": 15.0,
         "wheel_kd": 0.3,
         "damping": 2,
-        "stiffness": 1.5,
+        "stiffness": 0,
         "armature": 0.2,
         "termination_if_roll_greater_than": 20,  # Degrees
         "termination_if_pitch_greater_than": 20,
@@ -123,7 +123,7 @@ def get_cfgs():
         "num_slice_obs": 29,
         "history_length": 5,
         "obs_scales": {
-            "lin_vel": 1.0,
+            "lin_vel": 2.0,
             "ang_vel": 0.5,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
@@ -138,9 +138,9 @@ def get_cfgs():
         "tracking_similar_legged_sigma": 0.1,
         "tracking_gravity_sigma": 0.003,
         "reward_scales": {
-            "tracking_lin_vel": 1.2,
-            "tracking_ang_vel": 1.8,
-            "tracking_base_height": 2.4,    #和similar_legged对抗，similar_legged先提升会促进此项
+            "tracking_lin_vel": 1.0,
+            "tracking_ang_vel": 1.5,
+            "tracking_base_height": 2.0,    #和similar_legged对抗，similar_legged先提升会促进此项
             "lin_vel_z": -0.1, #大了影响高度变换速度
             "joint_action_rate": -0.005,
             "wheel_action_rate": -0.005,
@@ -159,7 +159,7 @@ def get_cfgs():
     command_cfg = {
         "num_commands": 4,
         "base_range": 1.0,  #基础范围
-        "lin_vel_x_range": [-1.5, 1.5], #修改范围要调整奖励权重
+        "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
         "height_target_range": [0.2 , 0.36],   #lower会导致跪地
@@ -171,12 +171,12 @@ def get_cfgs():
         # "curriculum_height_target_step":0.005,   #高度，先高再低，base_range表示[min+0.7height_range,max]
         "curriculum_lin_vel_min_range":0.25,   #比例
         "curriculum_ang_vel_min_range":0.075,   #比例
-        "lin_vel_err_range":[0.1,0.15],  #课程误差阈值
+        "lin_vel_err_range":[0.15,0.2],  #课程误差阈值
         "ang_vel_err_range":[0.3,0.4],  #课程误差阈值 连续曲线>方波>不波动
     }
     #域随机化 friction_ratio是范围波动 mass和com是偏移波动
     domain_rand_cfg = { 
-        "friction_ratio_range":[0.8 , 1.2],
+        "friction_ratio_range":[0.4 , 1.2],
         "random_base_mass_shift_range":[-1 , 1], #质量偏移量
         "random_other_mass_shift_range":[-0.1, 0.1],  #质量偏移量
         "random_base_com_shift":0.05, #位置偏移量 xyz
@@ -206,7 +206,7 @@ def get_cfgs():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v10")
+    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v11")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=15000)
     args = parser.parse_args()

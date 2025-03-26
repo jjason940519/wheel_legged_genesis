@@ -4,7 +4,7 @@
 
   <option cone="elliptic" impratio="200" />
   <!-- <option  timestep="0.002" /> -->
-  <option timestep="0.001" gravity="0 0 -9.81" integrator="implicitfast"/>
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"/>
 
   <default>
     <default class="biped_wheel">
@@ -67,17 +67,17 @@
         <geom type="mesh" rgba="0.15 0.15 0.15 1" mesh="L_hip"/>
         <body name="L_thigh" pos="-0.000265036 0.0144425 0">
           <inertial pos="-3.19e-06 0.0541482 -0.0301496" quat="0.701453 -0.0610942 0.0615033 0.707424" mass="1.123" diaginertia="0.00510552 0.00499318 0.00103785"/>
-          <joint name="L_thigh_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="1.5"/>
+          <joint name="L_thigh_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="0"/>
           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="L_thigh"/>
           <geom type="mesh" rgba="0.6 0.6 0.6 1" mesh="L_thigh"/>
           <body name="L_calf" pos="0 0.0527576 -0.215">
             <inertial pos="2.3e-05 0.0297417 -0.152755" quat="0.70545 -0.0225398 0.0222614 0.708051" mass="0.555" diaginertia="0.00387656 0.00382006 0.000210819"/>
-            <joint name="L_calf_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="1.5"/>
+            <joint name="L_calf_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="0"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="L_calf"/>
             <geom type="mesh" rgba="0.05 0.05 0.05 1" mesh="L_calf"/>
             <body name="L_wheel" pos="0 0.0372307 -0.215">
               <inertial pos="0 0.0151977 0" quat="0.706247 -0.0348799 -0.0348815 0.706245" mass="0.28" diaginertia="0.00088385 0.00045838 0.00045837"/>
-              <joint name="L_wheel_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="1.5"/>
+              <joint name="L_wheel_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="0"/>
               <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="L_wheel"/>
               <geom type="mesh" rgba="0.01 0.01 0.01 1" mesh="L_wheel"/>
             </body>
@@ -91,17 +91,17 @@
         <geom type="mesh" rgba="0.15 0.15 0.15 1" mesh="R_hip"/>
         <body name="R_thigh" pos="0 -0.01 0">
           <inertial pos="-4.55e-06 -0.0541488 -0.0301497" quat="0.707341 0.0614924 -0.0611022 0.701537" mass="1.123" diaginertia="0.00510563 0.00499323 0.00103787"/>
-          <joint name="R_thigh_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="1.5"/>
+          <joint name="R_thigh_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="0"/>
           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="R_thigh"/>
           <geom type="mesh" rgba="0.6 0.6 0.6 1" mesh="R_thigh"/>
           <body name="R_calf" pos="0 -0.0527576 -0.215">
             <inertial pos="2.256e-05 -0.0297421 -0.152754" quat="0.708063 0.0222594 -0.0225428 0.705438" mass="0.555" diaginertia="0.00387663 0.00382014 0.000210818"/>
-            <joint name="R_calf_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="1.5"/>
+            <joint name="R_calf_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="0"/>
             <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="R_calf"/>
             <geom type="mesh" rgba="0.05 0.05 0.05 1" mesh="R_calf"/>
             <body name="R_wheel" pos="0 -0.0372307 -0.215">
               <inertial pos="0 -0.0151977 0" quat="0.270598 0.653283 0.65328 0.270598" mass="0.28" diaginertia="0.00088386 0.000458381 0.000458379"/>
-              <joint name="R_wheel_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="1.5"/>
+              <joint name="R_wheel_joint" pos="0 0 0" axis="0 1 0" damping="2" armature="0.0" stiffness="0"/>
               <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="R_wheel"/>
               <geom type="mesh" rgba="0.01 0.01 0.01 1" mesh="R_wheel"/>
             </body>
@@ -141,15 +141,17 @@
     <jointvel name="R_wheel_joint_v" joint="R_wheel_joint" />
 
 
-    <!-- <jointactuatorfrc name="L_hip_torque" joint="L_hip_joint" noise="0.01" /> -->
-    <!-- <jointactuatorfrc name="L_thigh_torque" joint="L_thigh_joint" noise="0.01" />
-    <jointactuatorfrc name="L_calf_torque" joint="L_calf_joint" noise="0.01" />
-    <jointactuatorfrc name="L_wheel_torque" joint="L_wheel_joint" noise="0.01" /> -->
+
+    <jointactuatorfrc name="L_thigh_joint_t" joint="L_thigh_joint" noise="0.0" /> 
+    <jointactuatorfrc name="L_calf_joint_t" joint="L_calf_joint" noise="0.0" />
+    
 
     <!-- <jointactuatorfrc name="R_hip_torque" joint="R_hip_joint" noise="0.01" /> -->
-    <!-- <jointactuatorfrc name="R_thigh_torque" joint="R_thigh_joint" noise="0.01" />
-    <jointactuatorfrc name="R_calf_torque" joint="R_calf_joint" noise="0.01" />
-    <jointactuatorfrc name="R_wheel_torque" joint="R_wheel_joint" noise="0.01" /> -->
+    <jointactuatorfrc name="R_thigh_joint_t" joint="R_thigh_joint" noise="0.0" />
+    <jointactuatorfrc name="R_calf_joint_t" joint="R_calf_joint" noise="0.0" />
+
+    <jointactuatorfrc name="L_wheel_torque\" joint="L_wheel_joint" noise="0.0" />
+    <jointactuatorfrc name="R_wheel_torque" joint="R_wheel_joint" noise="0.0" />
 
     <framequat name="orientation" objtype="site" objname="imu" />
     <subtreelinvel name="base_lin_vel" body="base" />

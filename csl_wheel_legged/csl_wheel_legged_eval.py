@@ -19,8 +19,8 @@ import copy
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v9")
-    parser.add_argument("--ckpt", type=int, default=5800)
+    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v11")
+    parser.add_argument("--ckpt", type=int, default=5000)
     args = parser.parse_args()
 
     obs_history = []
