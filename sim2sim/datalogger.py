@@ -113,7 +113,7 @@ class DataLogger:
         axes[6].grid(True)
 
         # 8. Torques
-        for i in range(4):
+        for i in range(6):
             axes[7].plot(timestamps, torques[:, i], label=f'Torque {i}')
         axes[7].set_title('Joint Torques')
         axes[7].set_xlabel('Time (s)')

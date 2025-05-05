@@ -8,7 +8,6 @@ from rsl_rl.runners import OnPolicyRunner
 
 import genesis as gs # type: ignore
 
-
 def get_train_cfg(exp_name, max_iterations):
 
     train_cfg_dict = {
@@ -87,22 +86,28 @@ def get_cfgs():
         },
         "safe_force": {
             "L_hip_joint": 0.0,      # Fixed, no force needed
-            "L_thigh_joint": 30.0,
-            "L_calf_joint": 30.0,
+            "L_thigh_joint": 20.0,
+            "L_calf_joint": 20.0,
             "R_hip_joint": 0.0,      # Fixed, no force needed
-            "R_thigh_joint": 30.0,
-            "R_calf_joint": 30.0,
-            "L_wheel_joint": 30.0,
-            "R_wheel_joint": 30.0
+            "R_thigh_joint": 20.0,
+            "R_calf_joint": 20.0,
+            "L_wheel_joint": 3,
+            "R_wheel_joint": 3
         },
         "base_init_pos": {"urdf": [0.0, 0.0, 0.4]},  # Adjusted height (see below)
-        "joint_kp": 10.0,
-        "joint_kd": 0.2,
-        "wheel_kp": 15.0,
+        "joint_kp": 15,
+        "joint_kd": 0.3,
+        "wheel_kp": 0.0,
         "wheel_kd": 0.3,
-        "damping": 2,
+        "damping": 0.01,
         "stiffness": 0,
-        "armature": 0.2,
+        "armature": 0.01,
+        "calf_damping": 0.1,
+        "calf_stiffness": 0,
+        "calf_armature": 0.01,
+        "wheel_damping": 0.01,
+        "wheel_stifness": 0,
+        "wheel_armature": 0.01,
         "termination_if_roll_greater_than": 20,  # Degrees
         "termination_if_pitch_greater_than": 20,
         "termination_if_base_connect_plane_than": True,
@@ -206,7 +211,7 @@ def get_cfgs():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v11")
+    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v12")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=15000)
     args = parser.parse_args()

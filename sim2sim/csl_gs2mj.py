@@ -74,14 +74,17 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
     dof_torque = np.zeros(env_cfg["num_actions"])
     for i, dof_name in enumerate(env_cfg["dof_names"]):
         dof_torque[i] = get_sensor_data(dof_name+"_t")[0]
-        if i==3:
-            break
+
 
     cmds = torch.tensor(commands, device=device, dtype=torch.float32)
 
+    lin_vel_scales = torch.tensor([2.0, 0.0, 0.0], device=device, dtype=torch.float32)
+    scaled_base_lin_vel = base_lin_vel * lin_vel_scales
+
     return torch.cat(
         [
-            base_lin_vel * obs_scales["lin_vel"],  # 3
+            # base_lin_vel * obs_scales["lin_vel"],  # 3
+            scaled_base_lin_vel,
             base_ang_vel * obs_scales["ang_vel"],  # 3
             projected_gravity,  # 3
             cmds * commands_scale,  # 4
@@ -146,7 +149,7 @@ def main():
             
             actions = loaded_policy(obs_buf)
             actions = torch.clip(actions, -env_cfg["clip_actions"], env_cfg["clip_actions"])
-            slice_obs_buf, dof_torque = get_obs(env_cfg=env_cfg, obs_scales=obs_cfg["obs_scales"],
+            slice_obs_buf , dof_torque = get_obs(env_cfg=env_cfg, obs_scales=obs_cfg["obs_scales"],
                                     actions=actions, default_dof_pos=default_dof_pos, commands=commands)
             slice_obs_buf = slice_obs_buf.unsqueeze(0)
             obs_buf = torch.cat([history_obs_buf, slice_obs_buf], dim=0).view(-1)
