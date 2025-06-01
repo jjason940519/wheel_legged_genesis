@@ -6,4 +6,5 @@ __pycache__
 rsl_rl/build
 
 /csl_wheel_legged/logs/*
+/quick_wheel_legged/logs/*
 locomotion/logs/*

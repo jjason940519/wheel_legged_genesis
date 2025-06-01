@@ -3,7 +3,7 @@ import os
 import pickle
 import shutil
 
-from csl_wheel_legged_env import WheelLeggedEnv
+from quick_wheel_legged_env import WheelLeggedEnv
 from rsl_rl.runners import OnPolicyRunner
 
 import genesis as gs # type: ignore
@@ -66,20 +66,20 @@ def get_cfgs():
         ],
         "default_joint_angles": {
             # "L_hip_joint": 0.0,       # Fixed, included for completeness
-            "L_thigh_joint": 1.047,
-            "L_calf_joint": -2.094,
+            "L_thigh_joint": 1.8325,
+            "L_calf_joint": -2.617,
             # "R_hip_joint": 0.0,       # Fixed, included for completeness
-            "R_thigh_joint": 1.047,
-            "R_calf_joint": -2.094,
+            "R_thigh_joint": 1.8325,
+            "R_calf_joint": -2.617,
             "L_wheel_joint": 0.0,
             "R_wheel_joint": 0.0
         },
         "dof_limit": {
             # "L_hip_joint": [0.0, 0.0],       # Fixed, no range
-            "L_thigh_joint": [-1.57, 1.57],  # Example range, adjust as needed
+            "L_thigh_joint": [0, 2.1],  # Example range, adjust as needed
             "L_calf_joint": [-2.7, 0],         # Example range
             # "R_hip_joint": [0.0, 0.0],       # Fixed, no range
-            "R_thigh_joint": [-1.57, 1.57],
+            "R_thigh_joint": [0, 2.1],
             "R_calf_joint": [-2.7, 0],
             "L_wheel_joint": [0.0, 0.0],     # Continuous, no limits enforced
             "R_wheel_joint": [0.0, 0.0]
@@ -91,28 +91,28 @@ def get_cfgs():
             "R_hip_joint": 0.0,      # Fixed, no force needed
             "R_thigh_joint": 20.0,
             "R_calf_joint": 20.0,
-            "L_wheel_joint": 3,
-            "R_wheel_joint": 3
+            "L_wheel_joint": 4,
+            "R_wheel_joint": 4
         },
-        "base_init_pos": {"urdf": [0.0, 0.0, 0.4]},  # Adjusted height (see below)
+        "base_init_pos": {"urdf": [0.0, 0.0, 0.25]},  # Adjusted height (see below)
         "joint_kp": 15,
         "joint_kd": 0.3,
         "wheel_kp": 0.0,
         "wheel_kd": 0.3,
-        "thigh_damping": 0.01,
+        "thigh_damping": 0.1,
         "thigh_stiffness": 0,
         "thigh_armature": 0.01,
         "calf_damping": 0.1,
         "calf_stiffness": 0,
         "calf_armature": 0.01,
-        "wheel_damping": 0.01,
+        "wheel_damping": 0.05,
         "wheel_stifness": 0,
-        "wheel_armature": 0.01,
+        "wheel_armature": 0.005,
         "termination_if_roll_greater_than": 20,  # Degrees
         "termination_if_pitch_greater_than": 20,
         "termination_if_base_connect_plane_than": True,
         "connect_plane_links": [
-            "Base", "L_thigh", "L_calf", "R_thigh", "R_calf"
+            "base_link", "L_thigh_link", "L_calf_link", "R_thigh_link", "R_calf_link"
         ],
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
         "episode_length_s": 15.0,
@@ -124,8 +124,9 @@ def get_cfgs():
     }
     obs_cfg = {
         # num_obs = num_slice_obs + history_num * num_slice_obs
-        "num_obs": 174, #在rsl-rl中使用的变量为num_obs表示state数量
-        "num_slice_obs": 29,
+        "num_obs": 156, #在rsl-rl中使用的变量为num_obs表示state数量
+        "num_slice_obs": 26,
+        "num_privileged_obs": 156+3+6,
         "history_length": 5,
         "obs_scales": {
             "lin_vel": 2.0,
@@ -133,7 +134,18 @@ def get_cfgs():
             "dof_pos": 1.0,
             "dof_vel": 0.05,
             "height_measurements": 5.0,
+            "torque": 0.05
         },
+        "noise":{
+            "use": True,
+            "noise_level": 1,
+            "lin_vel": 0.1,
+            "ang_vel": 0.2,
+            "dof_pos": 0.04,
+            "dof_vel": 1.5,
+            "gravity": 0.05,
+            "height_measurements": 0.1,
+        }
     }
     # 名字和奖励函数名一一对应
     reward_cfg = {
@@ -167,7 +179,7 @@ def get_cfgs():
         "lin_vel_x_range": [-1.0, 1.0], #修改范围要调整奖励权重
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [-3.14, 3.14],   #修改范围要调整奖励权重
-        "height_target_range": [0.2 , 0.36],   #lower会导致跪地
+        "height_target_range": [0.15 , 0.25],   #lower会导致跪地
     }
     # 课程学习，奖励循序渐进 待优化
     curriculum_cfg = {
@@ -192,6 +204,7 @@ def get_cfgs():
         "dof_damping_range":[0.8 , 1.2], #比例
         "dof_stiffness_range":[0.8 , 1.2], #比例 
         "dof_armature_range":[0.8 , 1.2], #比例 额外惯性 类似电机减速器惯性
+        # "random_action_delay_range":[0, 10] #ms
         
     }
     #地形配置
@@ -212,7 +225,7 @@ def get_cfgs():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v12")
+    parser.add_argument("-e", "--exp_name", type=str, default="quick_wheel-legged-walking-v1")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=15000)
     args = parser.parse_args()
