@@ -586,7 +586,7 @@ class WheelLeggedEnv:
         cut_height = self.height_error.squeeze() < 0.1
         self.command_ranges[cut_height,3,0] -= self.curriculum_cfg["curriculum_ang_vel_step"]
         self.command_ranges[:,3,0].clip_(self.command_cfg["height_target_range"][0],
-                                         self.command_cfg["height_target_range"][0] + self.height_range * (1-self.command_cfg["base_range"]))
+                                         self.command_cfg["height_target_range"][1] + self.height_range * (1-self.command_cfg["base_range"]))
         # 重置误差
         self.lin_vel_error = torch.zeros((self.num_envs, 1), device=self.device, dtype=gs.tc_float)
         self.ang_vel_error = torch.zeros((self.num_envs, 1), device=self.device, dtype=gs.tc_float)

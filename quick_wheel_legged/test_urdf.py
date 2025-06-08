@@ -27,8 +27,8 @@ robot = scene.add_entity(
 scene.build()
 
 jnt_names = [
-    "R_thigh_joint", "R_calf_joint",
     "L_thigh_joint", "L_calf_joint",
+    "R_thigh_joint", "R_calf_joint",
     "L_wheel_joint", "R_wheel_joint"
 ]
 dofs_idx = [robot.get_joint(name).dof_idx_local for name in jnt_names]
@@ -49,13 +49,13 @@ robot.set_dofs_force_range(
     dofs_idx_local = dofs_idx,
 )
 
-l_thigh_joint = 1.8325
+l_thigh_joint = 1.22
 
-l_calf_joint = -2.617
+l_calf_joint = -1.92
 
-r_thigh_joint = 1.8325
+r_thigh_joint = 1.22
 
-r_calf_joint = -2.617
+r_calf_joint = -1.92
 
 
 for i in range(1000):
@@ -66,7 +66,7 @@ for i in range(1000):
             dofs_idx_local = dofs_idx[:4],
             zero_velocity = True 
         )
-        robot.set_pos([0., 0., 0.5], zero_velocity = False)
+        robot.set_pos([0., 0., 0.25], zero_velocity = False)
         robot.set_quat([1., 0., 0., 0.], zero_velocity = False)
         robot.zero_all_dofs_velocity()
 
@@ -76,7 +76,7 @@ for i in range(1000):
             dofs_idx_local = dofs_idx[0:4]
         )
         robot.control_dofs_velocity(
-            velocity = np.array([0, 0]),
+            velocity = np.array([20, 20]),
             dofs_idx_local = dofs_idx[4:6]
         )
         

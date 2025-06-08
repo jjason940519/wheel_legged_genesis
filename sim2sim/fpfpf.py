@@ -46,7 +46,7 @@ def world2self(quat, v):
     result = a - b + c
     return result.to(device)
 
-def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0.0, 0.26]):
+def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0.0, 0.25]):
     commands_scale = torch.tensor(
         [obs_scales["lin_vel"], obs_scales["lin_vel"], 
          obs_scales["ang_vel"], obs_scales["height_measurements"]], 
@@ -83,7 +83,7 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
 
     return torch.cat(
         [
-            base_lin_vel * obs_scales["lin_vel"],  # 3
+            # base_lin_vel * obs_scales["lin_vel"],  # 3
             # scaled_base_lin_vel,
             base_ang_vel * obs_scales["ang_vel"],  # 3
             projected_gravity,  # 3
@@ -97,12 +97,12 @@ def get_obs(env_cfg, obs_scales, actions, default_dof_pos, commands=[0.0, 0.0, 0
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="csl_wheel-legged-walking-v11")
+    parser.add_argument("-e", "--exp_name", type=str, default="quick_wheel-legged-walking-v3")
     args = parser.parse_args()
     logger = DataLogger('../sim2sim')
 
     # 拼接到 logs 文件夹的路径
-    log_dir = os.path.join('../csl_wheel_legged/logs', args.exp_name)
+    log_dir = os.path.join('../quick_wheel_legged/logs', args.exp_name)
     cfg_path = os.path.join(log_dir, 'cfgs.pkl')
 
     # 读取配置文件
@@ -144,6 +144,7 @@ def main():
         dtype=torch.float32)
     # from IPython import embed; embed()
     # 启动 mujoco 渲染
+    print(default_dof_pos)
     with mujoco.viewer.launch_passive(m, d) as viewer:
         while viewer.is_running():
             
@@ -160,7 +161,7 @@ def main():
             history_obs_buf[-1, :] = slice_obs_buf 
 
             # 更新动作
-            target_dof_pos = actions[0:4] * 0.05 + default_dof_pos[0:4]
+            target_dof_pos = actions[0:4] * 0.1 + default_dof_pos[0:4]
             target_dof_vel = actions[4:6] * 1 #env_cfg["wheel_action_scale"]
             target_dof_pos = torch.clamp(target_dof_pos, dof_pos_lower[0:4],dof_pos_upper[0:4])
             # print("act:", act)

@@ -10,10 +10,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 加载 mujoco 模型
-m = mujoco.MjModel.from_xml_path('scene_test.xml')
+m = mujoco.MjModel.from_xml_path('quick_scence.xml')
 d = mujoco.MjData(m)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def world2self(quat, v):
+    q_w = quat[0] 
+    q_vec = quat[1:] 
+    v_vec = torch.tensor(v, device=device,dtype=torch.float32)
+    a = v_vec * (2.0 * q_w**2 - 1.0)
+    b = torch.linalg.cross(q_vec, v_vec) * q_w * 2.0
+    c = q_vec * torch.dot(q_vec, v_vec) * 2.0
+    result = a - b + c
+    return result.to(device)
+
+def get_sensor_data(sensor_name):
+    sensor_id = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SENSOR, sensor_name)
+    if sensor_id == -1:
+        raise ValueError(f"Sensor '{sensor_name}' not found in model!")
+    start_idx = m.sensor_adr[sensor_id]
+    dim = m.sensor_dim[sensor_id]
+    sensor_values = d.sensordata[start_idx : start_idx + dim]
+    return torch.tensor(
+        sensor_values, 
+        device=device, 
+        dtype=torch.float32
+    )
 
 def run_thigh(runing_time, process_time, test_radian_max, test_radian_min):
     if runing_time < process_time:

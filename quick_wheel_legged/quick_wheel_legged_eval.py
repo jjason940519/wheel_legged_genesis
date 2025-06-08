@@ -9,7 +9,6 @@ from quick_wheel_legged_env import WheelLeggedEnv
 from rsl_rl.runners import OnPolicyRunner
 
 import genesis as gs
-
 import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -19,8 +18,8 @@ import copy
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="quick_wheel-legged-walking-v1")
-    parser.add_argument("--ckpt", type=int, default=2500)
+    parser.add_argument("-e", "--exp_name", type=str, default="quick_wheel-legged-walking-v13")
+    parser.add_argument("--ckpt", type=int, default=8000)
     args = parser.parse_args()
 
     obs_history = []
@@ -68,7 +67,7 @@ def main():
         print(f"模型加载失败: {e}")
         exit()
     obs, _ = env.reset()
-    pad = gamepad.control_gamepad(command_cfg,[1.0,1.0,3.14,0.005])
+    pad = gamepad.control_gamepad(command_cfg,[0.50,1.0,3.14,0.005])
     with torch.no_grad():
         while True:
             # actions = policy(obs)
@@ -87,7 +86,7 @@ def main():
                 commands_array = np.array(comands)
 
 
-            
+
 
 
 if __name__ == "__main__":
